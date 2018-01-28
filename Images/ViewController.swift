@@ -8,12 +8,12 @@
 
 import UIKit
 
-class ViewController: UIViewController {
+final class ViewController: UIViewController {
     
     private lazy var imagePicker = ImagePicker()
     
-    @IBOutlet weak var photoImageView: UIImageView!
-    @IBOutlet weak var pickPhotoButton: UIButton! {
+    @IBOutlet private weak var photoImageView: UIImageView!
+    @IBOutlet private weak var pickPhotoButton: UIButton! {
         didSet {
             ///IB buttonType = .custom
             pickPhotoButton.setTitle("Pick photo", for: .normal)
@@ -31,7 +31,7 @@ class ViewController: UIViewController {
         
     }
     
-    @IBAction func actionPickPhotoButton(_ sender: UIButton) {
+    @IBAction private func actionPickPhotoButton(_ sender: UIButton) {
         imagePicker.requestPhotoAccess { [weak self] result in
             guard let `self` = self else { return}
             
