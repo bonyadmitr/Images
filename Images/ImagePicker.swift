@@ -73,6 +73,10 @@ final class ImagePicker: NSObject {
             picker.sourceType = .camera
         }
         
+        guard UIImagePickerController.isSourceTypeAvailable(picker.sourceType) else {
+            return print("- not Available \(picker.sourceType)")
+        }
+        
         vc.present(picker, animated: true, completion: nil)
     }
 }
