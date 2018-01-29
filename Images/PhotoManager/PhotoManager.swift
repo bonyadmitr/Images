@@ -13,7 +13,7 @@ enum PhotoManagerAuthorizationStatus {
     case denied
 }
 
-func presentSettingsAlert() {
+func presentSettingsAlert(in controller: UIViewController) {
     let vc = UIAlertController(title: "Photos access disabled", message: "You can enable access to photos in Settings", preferredStyle: .alert)
     let settingsAction = UIAlertAction(title: "Open Settings", style: .default) { _ in
         UIApplication.shared.openSettings() /// 1
@@ -24,7 +24,8 @@ func presentSettingsAlert() {
     vc.addAction(settingsAction)
     
     DispatchQueue.main.async {
-        UIApplication.topController()?.present(vc, animated: true, completion: nil) /// 1
+        controller.present(vc, animated: true, completion: nil)
+//        UIApplication.topController()?.present(vc, animated: true, completion: nil) /// 1
         //UIApplication.shared.keyWindow!.rootViewController!.present(vc, animated: true, completion: nil) /// 2
     }
 }
@@ -38,44 +39,26 @@ private extension UICollectionView {
 
 final class PhotoManager: NSObject {
     
-    func requestAuthorization(handler: @escaping (_ status: PhotoManagerAuthorizationStatus) -> Void) {
-        PHPhotoLibrary.requestAuthorization { status in
-            DispatchQueue.main.async {
+    func requestPhotoAccess(handler: @escaping (_ status: PhotoManagerAuthorizationStatus) -> Void) {
+        switch PHPhotoLibrary.authorizationStatus() {
+        case .authorized:
+            handler(.authorized)
+        case .denied, .restricted:
+            handler(.denied)
+        case .notDetermined:
+            PHPhotoLibrary.requestAuthorization() { status in
                 switch status {
                 case .authorized:
                     self.photoLibrary.register(self)
                     handler(.authorized)
-                default:
+                case .denied, .restricted:
+                    handler(.denied)
+                case .notDetermined:
+                    /// won't happen but still
                     handler(.denied)
                 }
             }
         }
-        
-        
-        
-        //        let status = PHPhotoLibrary.authorizationStatus()
-        //        switch status {
-        //        case .authorized:
-        //            print("Good to proceed")
-        //            self.photoLibrary.register(self)
-        //        case .denied, .restricted :
-        //            print("Not allowed")
-        //        case .notDetermined:
-        //            print("notDetermined")
-        //            // ask for permissions
-        //            PHPhotoLibrary.requestAuthorization() { status in
-        //                switch status {
-        //                case .authorized:
-        //                    self.photoLibrary.register(self)
-        //                    print("Good to proceed")
-        //                case .denied, .restricted:
-        //                    print("Not allowed")
-        //                case .notDetermined:
-        //                    // won't happen but still
-        //                    break
-        //                }
-        //            }
-        //        }
     }
     
     // MARK: - Asset Caching
@@ -104,9 +87,9 @@ final class PhotoManager: NSObject {
             .map { indexPath in fetchResult.object(at: indexPath.item) }
         
         // Update the assets the PHCachingImageManager is caching.
-        imageManager.startCachingImages(for: addedAssets,
+        cachingManager.startCachingImages(for: addedAssets,
                                         targetSize: photoSize, contentMode: .aspectFill, options: nil)
-        imageManager.stopCachingImages(for: removedAssets,
+        cachingManager.stopCachingImages(for: removedAssets,
                                        targetSize: photoSize, contentMode: .aspectFill, options: nil)
         
         // Store the preheat rect to compare against in the future.
@@ -140,7 +123,7 @@ final class PhotoManager: NSObject {
     }
     
     func resetCachedAssets() {
-        imageManager.stopCachingImagesForAllAssets()
+        cachingManager.stopCachingImagesForAllAssets()
         previousPreheatRect = .zero
     }
     
@@ -148,14 +131,14 @@ final class PhotoManager: NSObject {
     // MARK: - Main
     
     private lazy var photoLibrary = PHPhotoLibrary.shared()
-    internal lazy var imageManager = PHCachingImageManager()
+    internal lazy var cachingManager = PHCachingImageManager()
     
     //static let shared = PhotoManager()
     
     var photoSize = PHImageManagerMaximumSize
     
     
-    var fetchResult = PHFetchResult<PHAsset>()
+    var fetchResult: PHFetchResult<PHAsset>!
     
     weak var delegate: PhotoManagerDelegate?
     
