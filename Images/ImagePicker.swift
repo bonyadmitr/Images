@@ -13,8 +13,17 @@ import Photos
 /// create defalt alert
 /// create alert sheet
 
+/// openPhoto
+/// openCamera ???
+/// openCameraPicker ???
+
 //typealias ResponseImage = (ResponseResult<UIImage>) -> Void
 typealias ResponseImage = (_ image: UIImage) -> Void
+
+enum ImagePickerType {
+    case photoLibrary
+    case camera
+}
 
 final class ImagePicker: NSObject {
     
@@ -30,31 +39,39 @@ final class ImagePicker: NSObject {
     
     private var handler: ResponseImage?
     
-    func openPicker(in vc: UIViewController, handler: @escaping ResponseImage) {
+    func openPicker(in vc: UIViewController, for type: ImagePickerType, handler: @escaping ResponseImage) {
         self.handler = handler
         
-        let picker = UIImagePickerController()
-        picker.sourceType = .photoLibrary
-        picker.delegate = self
-        ///picker.modalPresentationStyle = .OverFullScreen
-
-//        struct ImagePickerSettings {
-//            var barTintColor : UIColor?
-//            var tintColor : UIColor?
-//            var barStyle : UIBarStyle?
-//        }
         
-//        if let settings = settings {
-//            if let barTintColor = settings.barTintColor {
-//                imagePickerController.navigationBar.barTintColor = barTintColor
-//            }
-//            if let barStyle = settings.barStyle {
-//                imagePickerController.navigationBar.barStyle = barStyle
-//            }
-//            if let tintColor = settings.tintColor {
-//                imagePickerController.view.tintColor = tintColor
-//            }
-//        }
+        let picker = UIImagePickerController()
+        picker.delegate = self
+        
+        ///picker.modalPresentationStyle = .OverFullScreen
+        
+        //        struct ImagePickerSettings {
+        //            var barTintColor : UIColor?
+        //            var tintColor : UIColor?
+        //            var barStyle : UIBarStyle?
+        //        }
+        
+        //        if let settings = settings {
+        //            if let barTintColor = settings.barTintColor {
+        //                imagePickerController.navigationBar.barTintColor = barTintColor
+        //            }
+        //            if let barStyle = settings.barStyle {
+        //                imagePickerController.navigationBar.barStyle = barStyle
+        //            }
+        //            if let tintColor = settings.tintColor {
+        //                imagePickerController.view.tintColor = tintColor
+        //            }
+        //        }
+        
+        switch type {
+        case .photoLibrary:
+            picker.sourceType = .photoLibrary
+        case .camera:
+            picker.sourceType = .camera
+        }
         
         vc.present(picker, animated: true, completion: nil)
     }
@@ -104,7 +121,7 @@ extension ImagePicker {
 
 extension ImagePicker: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     
-    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
+    internal func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
         if let image = info[UIImagePickerControllerEditedImage] as? UIImage {
             handler?(image)
             //self.handler?(ResponseResult.success(image))
@@ -116,7 +133,7 @@ extension ImagePicker: UIImagePickerControllerDelegate, UINavigationControllerDe
         picker.dismiss(animated: true, completion: nil)
     }
     
-    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+    internal func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
         picker.dismiss(animated: true, completion: nil)
     }
 }

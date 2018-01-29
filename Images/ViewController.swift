@@ -37,10 +37,7 @@ final class ViewController: UIViewController {
             
             switch result {
             case .authorized:
-                /// openPhoto
-                /// openCamera ???
-                /// openCameraPicker ???
-                self.imagePicker.openPicker(in: self) { [weak self] image in
+                self.imagePicker.openPicker(in: self, for: .photoLibrary) { [weak self] image in
                     guard let `self` = self else { return}
                     self.photoImageView.image = image
                 }
