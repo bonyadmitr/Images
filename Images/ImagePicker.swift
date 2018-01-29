@@ -24,6 +24,16 @@ enum ImagePickerType {
     case photoLibrary
     case camera
 }
+extension ImagePickerType {
+    var imagePickerType: UIImagePickerControllerSourceType? {
+        switch self {
+        case .photoLibrary:
+            return .photoLibrary
+        case .camera:
+            return .camera
+        }
+    }
+}
 
 final class ImagePicker: NSObject {
     
@@ -42,10 +52,23 @@ final class ImagePicker: NSObject {
     func openPicker(in vc: UIViewController, for type: ImagePickerType, handler: @escaping ResponseImage) {
         self.handler = handler
         
+        guard let imagePickerType = type.imagePickerType else {
+            /// open another picker
+            return
+        }
         
+        guard UIImagePickerController.isSourceTypeAvailable(imagePickerType) else {
+            return print("- not Available \(imagePickerType)")
+        }
+        
+        let picker = imagePicker(for: imagePickerType)
+        vc.present(picker, animated: true, completion: nil)
+    }
+    
+    private func imagePicker(for type: UIImagePickerControllerSourceType) -> UIImagePickerController {
         let picker = UIImagePickerController()
         picker.delegate = self
-        
+        picker.sourceType = type
         ///picker.modalPresentationStyle = .OverFullScreen
         
         //        struct ImagePickerSettings {
@@ -66,18 +89,7 @@ final class ImagePicker: NSObject {
         //            }
         //        }
         
-        switch type {
-        case .photoLibrary:
-            picker.sourceType = .photoLibrary
-        case .camera:
-            picker.sourceType = .camera
-        }
-        
-        guard UIImagePickerController.isSourceTypeAvailable(picker.sourceType) else {
-            return print("- not Available \(picker.sourceType)")
-        }
-        
-        vc.present(picker, animated: true, completion: nil)
+        return picker
     }
 }
 
