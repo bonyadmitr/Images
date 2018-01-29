@@ -37,7 +37,7 @@ extension PhotoManager {
 
 // TODO: reuse without UIScreen + class
 @discardableResult
-func itemSize(for collectionView: UICollectionView) -> CGSize {
+func saveAndGetItemSize(for collectionView: UICollectionView) -> CGSize {
     
     let viewWidth = UIScreen.main.bounds.width
     
