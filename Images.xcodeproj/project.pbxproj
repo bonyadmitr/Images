@@ -59,6 +59,49 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		6639B746201FD4F70074C9A3 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				669BA87B201E7A1600F218B0 /* Color */,
+				666E282E201E574F00CDC5EF /* UIApplication+Settings.swift */,
+				666E2830201E577900CDC5EF /* UIImage+Orientation.swift */,
+				666E282C201E574600CDC5EF /* UICollectionView+Extensions.swift */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
+		6639B747201FD5130074C9A3 /* Classes */ = {
+			isa = PBXGroup;
+			children = (
+				669BA890201F7EB500F218B0 /* PhotoManager */,
+				669BA882201E7D3100F218B0 /* ImagePicker.swift */,
+				669BA884201E814600F218B0 /* ResponseResult.swift */,
+			);
+			path = Classes;
+			sourceTree = "<group>";
+		};
+		6639B748201FD5330074C9A3 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				666E281A201E561E00CDC5EF /* AppDelegate.swift */,
+				666E2821201E561E00CDC5EF /* Assets.xcassets */,
+				666E2823201E561E00CDC5EF /* LaunchScreen.storyboard */,
+				666E2826201E561E00CDC5EF /* Info.plist */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		6639B749201FD53F0074C9A3 /* Presentation */ = {
+			isa = PBXGroup;
+			children = (
+				666E281E201E561E00CDC5EF /* Main.storyboard */,
+				666E281C201E561E00CDC5EF /* ViewController.swift */,
+				666E2839201E594C00CDC5EF /* LocalPhotosController.swift */,
+				666E283B201E59A900CDC5EF /* PhotoCell.swift */,
+			);
+			path = Presentation;
+			sourceTree = "<group>";
+		};
 		666E280E201E561E00CDC5EF = {
 			isa = PBXGroup;
 			children = (
@@ -78,21 +121,10 @@
 		666E2819201E561E00CDC5EF /* Images */ = {
 			isa = PBXGroup;
 			children = (
-				666E281A201E561E00CDC5EF /* AppDelegate.swift */,
-				666E281C201E561E00CDC5EF /* ViewController.swift */,
-				669BA882201E7D3100F218B0 /* ImagePicker.swift */,
-				666E2839201E594C00CDC5EF /* LocalPhotosController.swift */,
-				666E283B201E59A900CDC5EF /* PhotoCell.swift */,
-				666E281E201E561E00CDC5EF /* Main.storyboard */,
-				666E2821201E561E00CDC5EF /* Assets.xcassets */,
-				666E2823201E561E00CDC5EF /* LaunchScreen.storyboard */,
-				666E2826201E561E00CDC5EF /* Info.plist */,
-				669BA890201F7EB500F218B0 /* PhotoManager */,
-				669BA884201E814600F218B0 /* ResponseResult.swift */,
-				666E282E201E574F00CDC5EF /* UIApplication+Settings.swift */,
-				666E2830201E577900CDC5EF /* UIImage+Orientation.swift */,
-				669BA87B201E7A1600F218B0 /* Color */,
-				666E282C201E574600CDC5EF /* UICollectionView+Extensions.swift */,
+				6639B748201FD5330074C9A3 /* App */,
+				6639B749201FD53F0074C9A3 /* Presentation */,
+				6639B747201FD5130074C9A3 /* Classes */,
+				6639B746201FD4F70074C9A3 /* Extensions */,
 			);
 			path = Images;
 			sourceTree = "<group>";
@@ -339,7 +371,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				INFOPLIST_FILE = Images/Info.plist;
+				INFOPLIST_FILE = "$(SRCROOT)/Images/App/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.by.Images;
@@ -354,7 +386,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				INFOPLIST_FILE = Images/Info.plist;
+				INFOPLIST_FILE = "$(SRCROOT)/Images/App/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.by.Images;
