@@ -10,6 +10,7 @@ import AVFoundation
 import Photos
 
 /// open another picker
+/// reuse requestPhotoAccess
 
 typealias ResponseImage = (_ image: UIImage) -> Void
 
@@ -47,13 +48,17 @@ final class ImagePicker: NSObject {
         }
         
         let picker = imagePicker(for: imagePickerType)
-        vc.present(picker, animated: true, completion: nil)
+        
+        DispatchQueue.main.async {
+            vc.present(picker, animated: true, completion: nil)
+        }
     }
     
     private func imagePicker(for type: UIImagePickerControllerSourceType) -> UIImagePickerController {
         let picker = UIImagePickerController()
         picker.delegate = self
         picker.sourceType = type
+//        picker.allowsEditing = true
         setupPickerBySettings(picker)
         return picker
     }
@@ -176,6 +181,8 @@ extension ImagePicker {
         alertVC.addAction(libraryAction)
         alertVC.addAction(cancelAction)
         
-        vc.present(alertVC, animated: true, completion: nil)
+        DispatchQueue.main.async {
+            vc.present(alertVC, animated: true, completion: nil)
+        }
     }
 }
