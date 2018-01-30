@@ -12,11 +12,14 @@ final class LocalPhotosController: UIViewController {
     
     @IBOutlet weak var collectionView: UICollectionView!
     private lazy var photoManager = PhotoManager()
+    private lazy var settingsRouter = SettingsRouter()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        photoManager.requestPhotoAccess { status in
+        photoManager.requestPhotoAccess { [weak self] status in
+            guard let `self` = self else { return }
+            
             switch status {
             case .authorized:
                 self.photoManager.resetCachedAssets()
@@ -24,7 +27,7 @@ final class LocalPhotosController: UIViewController {
                 self.photoManager.prepereForUse()
                 self.collectionView.reloadData()
             case .denied:
-                presentSettingsAlert(in: self)
+                self.settingsRouter.presentSettingsAlertForPhotoAccess(in: self)
             }
         }
     }
@@ -45,11 +48,13 @@ final class LocalPhotosController: UIViewController {
     }
     
     /// View controller-based status bar appearance
-    override var prefersStatusBarHidden: Bool { return true }
+    override var prefersStatusBarHidden: Bool {
+        return true
+    }
     
     /// Determine the size of the thumbnails to request from the PHCachingImageManager
     private func updateItemSize() {
-        let size = itemSize(for: collectionView)
+        let size = saveAndGetItemSize(for: collectionView)
         let scale = UIScreen.main.scale
         photoManager.photoSize = CGSize(width: size.width * scale, height: size.height * scale)
     }

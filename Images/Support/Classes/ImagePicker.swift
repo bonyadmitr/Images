@@ -9,13 +9,15 @@
 import AVFoundation
 import Photos
 
-/// create for camera
-/// create defalt alert
-/// create alert sheet
-
-/// openPhoto
-/// openCamera ???
-/// openCameraPicker ???
+/**
+add to Info.plist
+1) Camera
+NSCameraUsageDescription
+2) Photo Library
+NSPhotoLibraryUsageDescription
+Example text:
+Please allow access to save photo in your photo library
+ */
 
 //typealias ResponseImage = (ResponseResult<UIImage>) -> Void
 typealias ResponseImage = (_ image: UIImage) -> Void
@@ -35,17 +37,19 @@ extension ImagePickerType {
     }
 }
 
+struct ImagePickerSettings {
+    let barTintColor: UIColor?
+    let tintColor: UIColor?
+    let barStyle: UIBarStyle?
+}
+
 final class ImagePicker: NSObject {
     
-    override init() {
-        super.init()
-//        controller.sourceType = .photoLibrary
-//        controller.delegate = self
-    }
+    /// better to use UINavigationBar.appearance() for gloabl customization
+    /// use "settings" if need colors besides UINavigationBar.appearance()
+    var settings: ImagePickerSettings?
     
-//    func dismiss() {
-//        controller.dismiss(animated: true, completion: nil)
-//    }
+    private lazy var settingsRouter = SettingsRouter()
     
     private var handler: ResponseImage?
     
@@ -69,27 +73,26 @@ final class ImagePicker: NSObject {
         let picker = UIImagePickerController()
         picker.delegate = self
         picker.sourceType = type
-        ///picker.modalPresentationStyle = .OverFullScreen
-        
-        //        struct ImagePickerSettings {
-        //            var barTintColor : UIColor?
-        //            var tintColor : UIColor?
-        //            var barStyle : UIBarStyle?
-        //        }
-        
-        //        if let settings = settings {
-        //            if let barTintColor = settings.barTintColor {
-        //                imagePickerController.navigationBar.barTintColor = barTintColor
-        //            }
-        //            if let barStyle = settings.barStyle {
-        //                imagePickerController.navigationBar.barStyle = barStyle
-        //            }
-        //            if let tintColor = settings.tintColor {
-        //                imagePickerController.view.tintColor = tintColor
-        //            }
-        //        }
-        
+        //picker.modalPresentationStyle = .OverFullScreen ///???
+        setup(picker: picker)
         return picker
+    }
+    
+    private func setup(picker: UIImagePickerController) {
+        if let settings = settings {
+            let navBar = picker.navigationBar
+            
+            if let barTintColor = settings.barTintColor {
+                navBar.barTintColor = barTintColor
+            }
+            if let barStyle = settings.barStyle {
+                navBar.barStyle = barStyle
+            }
+            if let tintColor = settings.tintColor {
+                navBar.tintColor = tintColor
+                navBar.titleTextAttributes = [NSAttributedStringKey.foregroundColor: tintColor]
+            }
+        }
     }
 }
 
@@ -154,3 +157,47 @@ extension ImagePicker: UIImagePickerControllerDelegate, UINavigationControllerDe
     }
 }
 
+extension ImagePicker {
+    func openPicker(in vc: UIViewController, handler: @escaping ResponseImage) {
+        
+        let alertVC = UIAlertController(title: "Choose source", message: nil, preferredStyle: .actionSheet)
+        
+        let cameraAction = UIAlertAction(title: "Camera", style: .default) { _ in
+            self.requestCameraAccess { [weak self] result in
+                guard let `self` = self else { return }
+                
+                switch result {
+                case .authorized:
+                    self.openPicker(in: vc, for: .camera) { image in
+                        handler(image)
+                    }
+                case .denied:
+                    self.settingsRouter.presentSettingsAlertForCameraAccess(in: vc)
+                }
+            }
+        }
+        
+        let libraryAction = UIAlertAction(title: "Photo library", style: .default) { _ in
+            self.requestPhotoAccess { [weak self] result in
+                guard let `self` = self else { return}
+                
+                switch result {
+                case .authorized:
+                    self.openPicker(in: vc, for: .photoLibrary) { image in
+                        handler(image)
+                    }
+                case .denied:
+                    self.settingsRouter.presentSettingsAlertForPhotoAccess(in: vc)
+                }
+            }
+        }
+        
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+
+        alertVC.addAction(cameraAction)
+        alertVC.addAction(libraryAction)
+        alertVC.addAction(cancelAction)
+        
+        vc.present(alertVC, animated: true, completion: nil)
+    }
+}
