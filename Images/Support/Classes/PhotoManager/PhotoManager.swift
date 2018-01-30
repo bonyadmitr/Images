@@ -20,7 +20,6 @@ final class PhotoManager: NSObject {
             PHPhotoLibrary.requestAuthorization() { status in
                 switch status {
                 case .authorized:
-                    self.photoLibrary.register(self)
                     handler(.success)
                 case .denied, .restricted:
                     handler(.denied)
@@ -98,7 +97,6 @@ final class PhotoManager: NSObject {
         previousPreheatRect = .zero
     }
     
-    
     // MARK: - Main
     
     private lazy var photoLibrary = PHPhotoLibrary.shared()
@@ -112,54 +110,18 @@ final class PhotoManager: NSObject {
     weak var delegate: PhotoManagerDelegate?
     
     lazy var requestOptions: PHImageRequestOptions = {
-        let requestOptions = PHImageRequestOptions()
-        requestOptions.isSynchronous = true
-        requestOptions.deliveryMode = .highQualityFormat
-        return requestOptions
+        let options = PHImageRequestOptions()
+        options.isSynchronous = true
+        options.deliveryMode = .highQualityFormat
+        return options
     }()
     
     func prepereForUse() {
+        photoLibrary.register(self)
         let allPhotosOptions = PHFetchOptions()
         allPhotosOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: true)]
         fetchResult = PHAsset.fetchAssets(with: allPhotosOptions)
-        //requestAuthorization()
     }
-    
-    //    func prepereForUse() {
-    //        getAssets()
-    //
-    //        cachingImageManager.startCachingImages(for: assets,
-    //                                               targetSize: PHImageManagerMaximumSize,
-    //                                               contentMode: .default,
-    //                                               options: requestOptions)
-    //    }
-    
-    //    func getPhotos(handler: ([UIImage]) -> Void) {
-    //
-    //        if assets.count == 0 {
-    //            getAssets()
-    //        }
-    //
-    //        var images = [UIImage]()
-    //        for i in 0..<assets.count {
-    //            cachingImageManager.requestImage(for: assets[i],
-    //                                                  targetSize: PHImageManagerMaximumSize,
-    //                                                  contentMode: .default,
-    //                                                  options: requestOptions)
-    //            { (image, _) in /// image, options(orientation,...)
-    //                guard let img = image else { return }
-    //                images.append(img)
-    //            }
-    //        }
-    //        handler(images)
-    //
-    //    }
-    
-    /// https://stackoverflow.com/questions/40854886/swift-take-a-photo-and-save-to-photo-library
-    /// temp
-//    func saveToLibrary(_ image: UIImage) {
-//        UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil)
-//    }
     
     deinit {
         photoLibrary.unregisterChangeObserver(self)
