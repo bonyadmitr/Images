@@ -38,7 +38,7 @@ final class PhotoManager: NSObject {
     
     func updateCachedAssetsFor(view: UIView, collectionView: UICollectionView) {
         // Update only if the view is visible.
-        //            guard isViewLoaded && view.window != nil else { return }
+        guard view.window != nil else { return }
         
         // The preheat window is twice the height of the visible rect.
         let visibleRect = CGRect(origin: collectionView.contentOffset, size: collectionView.bounds.size)
@@ -52,10 +52,10 @@ final class PhotoManager: NSObject {
         let (addedRects, removedRects) = differencesBetweenRects(previousPreheatRect, preheatRect)
         let addedAssets = addedRects
             .flatMap { rect in collectionView.indexPathsForElements(in: rect) }
-            .map { indexPath in fetchResult.object(at: indexPath.item) }
+            .flatMap { indexPath in fetchResult?.object(at: indexPath.item) }
         let removedAssets = removedRects
             .flatMap { rect in collectionView.indexPathsForElements(in: rect) }
-            .map { indexPath in fetchResult.object(at: indexPath.item) }
+            .flatMap { indexPath in fetchResult?.object(at: indexPath.item) }
         
         // Update the assets the PHCachingImageManager is caching.
         cachingManager.startCachingImages(for: addedAssets,
@@ -107,7 +107,7 @@ final class PhotoManager: NSObject {
     var photoSize = PHImageManagerMaximumSize
     
     
-    var fetchResult: PHFetchResult<PHAsset>!
+    var fetchResult: PHFetchResult<PHAsset>?
     
     weak var delegate: PhotoManagerDelegate?
     
@@ -171,14 +171,18 @@ extension PhotoManager: PHPhotoLibraryChangeObserver {
     func photoLibraryDidChange(_ changeInstance: PHChange) {
         print(changeInstance)
         
-        guard let changes = changeInstance.changeDetails(for: fetchResult)
-            else { return }
+        guard
+            let fetchResult = fetchResult,
+            let changes = changeInstance.changeDetails(for: fetchResult)
+        else {
+            return
+        }
         
         // Change notifications may be made on a background queue. Re-dispatch to the
         // main queue before acting on the change as we'll be updating the UI.
         DispatchQueue.main.sync {
             // Hang on to the new fetch result.
-            fetchResult = changes.fetchResultAfterChanges
+            self.fetchResult = changes.fetchResultAfterChanges
             self.delegate?.photoLibraryDidChange(with: changes)
             resetCachedAssets()
         }

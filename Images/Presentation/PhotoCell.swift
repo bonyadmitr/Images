@@ -22,7 +22,9 @@ final class PhotoCell: UICollectionViewCell {
 
 extension PhotoManager {
     func fill(cell: PhotoCell, for indexPath: IndexPath) {
-        let asset = fetchResult.object(at: indexPath.item)
+        guard let asset = fetchResult?.object(at: indexPath.item) else {
+            return
+        }
         cell.representedAssetIdentifier = asset.localIdentifier
         
         cachingManager.requestImage(for: asset, targetSize: photoSize, contentMode: .default, options: nil, resultHandler: { image, _ in
