@@ -28,7 +28,4 @@ extension UIButton {
         
         setBackgroundImage(clippedBackgroundImage, for: state)
     }
-    
-    
-    
 }

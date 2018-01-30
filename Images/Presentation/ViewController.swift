@@ -10,7 +10,9 @@ import UIKit
 
 final class ViewController: UIViewController {
     
-    private lazy var imagePicker = ImagePicker()
+    private lazy var imagePicker = ImagePicker().setup { /// optional customization
+        $0.settings = ImagePickerSettings(barTintColor: #colorLiteral(red: 0.2392156869, green: 0.6745098233, blue: 0.9686274529, alpha: 1), tintColor: .white, barStyle: .black)
+    }
     
     @IBOutlet private weak var photoImageView: UIImageView!
     @IBOutlet private weak var pickPhotoButton: UIButton! {
@@ -23,13 +25,6 @@ final class ViewController: UIViewController {
             pickPhotoButton.setBackgroundColor(#colorLiteral(red: 0.2392156869, green: 0.6745098233, blue: 0.9686274529, alpha: 1), for: .normal)
             pickPhotoButton.setBackgroundColor(#colorLiteral(red: 0.2392156869, green: 0.6745098233, blue: 0.9686274529, alpha: 1).darker(), for: .highlighted)
         }
-    }
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-      
-        /// optional customization
-        imagePicker.settings = ImagePickerSettings(barTintColor: #colorLiteral(red: 0.2392156869, green: 0.6745098233, blue: 0.9686274529, alpha: 1), tintColor: .white, barStyle: .black)
     }
     
     @IBAction private func actionPickPhotoButton(_ sender: UIButton) {

@@ -49,6 +49,8 @@ final class ImagePicker: NSObject {
     /// use "settings" if need colors besides UINavigationBar.appearance()
     var settings: ImagePickerSettings?
     
+    private lazy var settingsRouter = SettingsRouter()
+    
     private var handler: ResponseImage?
     
     func openPicker(in vc: UIViewController, for type: ImagePickerType, handler: @escaping ResponseImage) {
@@ -162,7 +164,7 @@ extension ImagePicker {
         
         let cameraAction = UIAlertAction(title: "Camera", style: .default) { _ in
             self.requestCameraAccess { [weak self] result in
-                guard let `self` = self else { return}
+                guard let `self` = self else { return }
                 
                 switch result {
                 case .authorized:
@@ -170,8 +172,7 @@ extension ImagePicker {
                         handler(image)
                     }
                 case .denied:
-                    /// temp
-                    presentSettingsAlert(in: vc)
+                    self.settingsRouter.presentSettingsAlertForCameraAccess(in: vc)
                 }
             }
         }
@@ -186,8 +187,7 @@ extension ImagePicker {
                         handler(image)
                     }
                 case .denied:
-                    /// temp
-                    presentSettingsAlert(in: vc)
+                    self.settingsRouter.presentSettingsAlertForPhotoAccess(in: vc)
                 }
             }
         }

@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6639B74B2020DA240074C9A3 /* SettingsRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6639B74A2020DA240074C9A3 /* SettingsRouter.swift */; };
+		6639B74E2020DDC30074C9A3 /* Сustomizable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6639B74D2020DDC30074C9A3 /* Сustomizable.swift */; };
 		666E281B201E561E00CDC5EF /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 666E281A201E561E00CDC5EF /* AppDelegate.swift */; };
 		666E281D201E561E00CDC5EF /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 666E281C201E561E00CDC5EF /* ViewController.swift */; };
 		666E2820201E561E00CDC5EF /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 666E281E201E561E00CDC5EF /* Main.storyboard */; };
@@ -27,6 +29,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		6639B74A2020DA240074C9A3 /* SettingsRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsRouter.swift; sourceTree = "<group>"; };
+		6639B74D2020DDC30074C9A3 /* Сustomizable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Сustomizable.swift"; sourceTree = "<group>"; };
 		666E2817201E561E00CDC5EF /* Images.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Images.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		666E281A201E561E00CDC5EF /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		666E281C201E561E00CDC5EF /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -75,6 +79,7 @@
 			children = (
 				669BA890201F7EB500F218B0 /* PhotoManager */,
 				669BA882201E7D3100F218B0 /* ImagePicker.swift */,
+				6639B74A2020DA240074C9A3 /* SettingsRouter.swift */,
 				669BA884201E814600F218B0 /* ResponseResult.swift */,
 			);
 			path = Classes;
@@ -102,6 +107,16 @@
 			path = Presentation;
 			sourceTree = "<group>";
 		};
+		6639B74C2020DDB80074C9A3 /* Support */ = {
+			isa = PBXGroup;
+			children = (
+				6639B74D2020DDC30074C9A3 /* Сustomizable.swift */,
+				6639B747201FD5130074C9A3 /* Classes */,
+				6639B746201FD4F70074C9A3 /* Extensions */,
+			);
+			path = Support;
+			sourceTree = "<group>";
+		};
 		666E280E201E561E00CDC5EF = {
 			isa = PBXGroup;
 			children = (
@@ -123,8 +138,7 @@
 			children = (
 				6639B748201FD5330074C9A3 /* App */,
 				6639B749201FD53F0074C9A3 /* Presentation */,
-				6639B747201FD5130074C9A3 /* Classes */,
-				6639B746201FD4F70074C9A3 /* Extensions */,
+				6639B74C2020DDB80074C9A3 /* Support */,
 			);
 			path = Images;
 			sourceTree = "<group>";
@@ -229,11 +243,13 @@
 				669BA881201E7A1600F218B0 /* UIImage+Color.swift in Sources */,
 				666E283A201E594C00CDC5EF /* LocalPhotosController.swift in Sources */,
 				666E281D201E561E00CDC5EF /* ViewController.swift in Sources */,
+				6639B74B2020DA240074C9A3 /* SettingsRouter.swift in Sources */,
 				666E282F201E574F00CDC5EF /* UIApplication+Settings.swift in Sources */,
 				666E2831201E577900CDC5EF /* UIImage+Orientation.swift in Sources */,
 				669BA893201F7EB600F218B0 /* PhotoManager.swift in Sources */,
 				666E281B201E561E00CDC5EF /* AppDelegate.swift in Sources */,
 				666E282D201E574600CDC5EF /* UICollectionView+Extensions.swift in Sources */,
+				6639B74E2020DDC30074C9A3 /* Сustomizable.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

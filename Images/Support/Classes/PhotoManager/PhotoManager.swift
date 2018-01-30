@@ -13,23 +13,6 @@ enum PhotoManagerAuthorizationStatus {
     case denied
 }
 
-func presentSettingsAlert(in controller: UIViewController) {
-    let vc = UIAlertController(title: "Photos access disabled", message: "You can enable access to photos in Settings", preferredStyle: .alert)
-    let settingsAction = UIAlertAction(title: "Open Settings", style: .default) { _ in
-        UIApplication.shared.openSettings() /// 1
-        //UIApplication.shared.openURL(URL(string: UIApplicationOpenSettingsURLString)!) /// 2
-    }
-    let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
-    vc.addAction(cancelAction)
-    vc.addAction(settingsAction)
-    
-    DispatchQueue.main.async {
-        controller.present(vc, animated: true, completion: nil)
-//        UIApplication.topController()?.present(vc, animated: true, completion: nil) /// 1
-        //UIApplication.shared.keyWindow!.rootViewController!.present(vc, animated: true, completion: nil) /// 2
-    }
-}
-
 private extension UICollectionView {
     func indexPathsForElements(in rect: CGRect) -> [IndexPath] {
         let allLayoutAttributes = collectionViewLayout.layoutAttributesForElements(in: rect)!

@@ -12,11 +12,14 @@ final class LocalPhotosController: UIViewController {
     
     @IBOutlet weak var collectionView: UICollectionView!
     private lazy var photoManager = PhotoManager()
+    private lazy var settingsRouter = SettingsRouter()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        photoManager.requestPhotoAccess { status in
+        photoManager.requestPhotoAccess { [weak self] status in
+            guard let `self` = self else { return }
+            
             switch status {
             case .authorized:
                 self.photoManager.resetCachedAssets()
@@ -24,7 +27,7 @@ final class LocalPhotosController: UIViewController {
                 self.photoManager.prepereForUse()
                 self.collectionView.reloadData()
             case .denied:
-                presentSettingsAlert(in: self)
+                self.settingsRouter.presentSettingsAlertForPhotoAccess(in: self)
             }
         }
     }
