@@ -19,16 +19,16 @@ final class ViewController: UIViewController {
             pickPhotoButton.setTitle("Pick photo", for: .normal)
             pickPhotoButton.setTitleColor(UIColor.white, for: .normal)
             pickPhotoButton.setTitleColor(UIColor.white.darker(), for: .highlighted)
-            pickPhotoButton.titleLabel?.font = UIFont.preferredFont(forTextStyle: .caption1)
-            pickPhotoButton.setBackgroundColor(#colorLiteral(red: 0.3647058904, green: 0.06666667014, blue: 0.9686274529, alpha: 1), for: .normal)
-            pickPhotoButton.setBackgroundColor(#colorLiteral(red: 0.3647058904, green: 0.06666667014, blue: 0.9686274529, alpha: 1).darker(), for: .highlighted)
+            pickPhotoButton.titleLabel?.font = UIFont.preferredFont(forTextStyle: .body)
+            pickPhotoButton.setBackgroundColor(#colorLiteral(red: 0.2392156869, green: 0.6745098233, blue: 0.9686274529, alpha: 1), for: .normal)
+            pickPhotoButton.setBackgroundColor(#colorLiteral(red: 0.2392156869, green: 0.6745098233, blue: 0.9686274529, alpha: 1).darker(), for: .highlighted)
         }
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        
+        imagePicker.settings = ImagePickerSettings(barTintColor: #colorLiteral(red: 0.2392156869, green: 0.6745098233, blue: 0.9686274529, alpha: 1), tintColor: .white, barStyle: .black)
     }
     
     @IBAction private func actionPickPhotoButton(_ sender: UIButton) {

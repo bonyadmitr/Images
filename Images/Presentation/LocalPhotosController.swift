@@ -45,7 +45,9 @@ final class LocalPhotosController: UIViewController {
     }
     
     /// View controller-based status bar appearance
-    override var prefersStatusBarHidden: Bool { return true }
+    override var prefersStatusBarHidden: Bool {
+        return true
+    }
     
     /// Determine the size of the thumbnails to request from the PHCachingImageManager
     private func updateItemSize() {

@@ -35,7 +35,16 @@ extension ImagePickerType {
     }
 }
 
+struct ImagePickerSettings {
+    let barTintColor: UIColor?
+    let tintColor: UIColor?
+    let barStyle: UIBarStyle?
+}
+
 final class ImagePicker: NSObject {
+    
+    /// check UINavigationBar.appearance
+    var settings: ImagePickerSettings?
     
     override init() {
         super.init()
@@ -69,27 +78,26 @@ final class ImagePicker: NSObject {
         let picker = UIImagePickerController()
         picker.delegate = self
         picker.sourceType = type
-        ///picker.modalPresentationStyle = .OverFullScreen
-        
-        //        struct ImagePickerSettings {
-        //            var barTintColor : UIColor?
-        //            var tintColor : UIColor?
-        //            var barStyle : UIBarStyle?
-        //        }
-        
-        //        if let settings = settings {
-        //            if let barTintColor = settings.barTintColor {
-        //                imagePickerController.navigationBar.barTintColor = barTintColor
-        //            }
-        //            if let barStyle = settings.barStyle {
-        //                imagePickerController.navigationBar.barStyle = barStyle
-        //            }
-        //            if let tintColor = settings.tintColor {
-        //                imagePickerController.view.tintColor = tintColor
-        //            }
-        //        }
-        
+        //picker.modalPresentationStyle = .OverFullScreen ///???
+        setup(picker: picker)
         return picker
+    }
+    
+    private func setup(picker: UIImagePickerController) {
+        if let settings = settings {
+            let navBar = picker.navigationBar
+            
+            if let barTintColor = settings.barTintColor {
+                navBar.barTintColor = barTintColor
+            }
+            if let barStyle = settings.barStyle {
+                navBar.barStyle = barStyle
+            }
+            if let tintColor = settings.tintColor {
+                navBar.tintColor = tintColor
+                navBar.titleTextAttributes = [NSAttributedStringKey.foregroundColor: tintColor]
+            }
+        }
     }
 }
 
