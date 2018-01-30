@@ -43,18 +43,9 @@ struct ImagePickerSettings {
 
 final class ImagePicker: NSObject {
     
-    /// check UINavigationBar.appearance
+    /// better to use UINavigationBar.appearance() for gloabl customization
+    /// use "settings" if need colors besides UINavigationBar.appearance()
     var settings: ImagePickerSettings?
-    
-    override init() {
-        super.init()
-//        controller.sourceType = .photoLibrary
-//        controller.delegate = self
-    }
-    
-//    func dismiss() {
-//        controller.dismiss(animated: true, completion: nil)
-//    }
     
     private var handler: ResponseImage?
     
@@ -162,3 +153,49 @@ extension ImagePicker: UIImagePickerControllerDelegate, UINavigationControllerDe
     }
 }
 
+extension ImagePicker {
+    func openPicker(in vc: UIViewController, handler: @escaping ResponseImage) {
+        
+        let alertVC = UIAlertController(title: "Choose source", message: nil, preferredStyle: .actionSheet)
+        
+        let cameraAction = UIAlertAction(title: "Camera", style: .default) { _ in
+            self.requestCameraAccess { [weak self] result in
+                guard let `self` = self else { return}
+                
+                switch result {
+                case .authorized:
+                    self.openPicker(in: vc, for: .camera) { image in
+                        handler(image)
+                    }
+                case .denied:
+                    /// temp
+                    presentSettingsAlert(in: vc)
+                }
+            }
+        }
+        
+        let libraryAction = UIAlertAction(title: "Photo library", style: .default) { _ in
+            self.requestPhotoAccess { [weak self] result in
+                guard let `self` = self else { return}
+                
+                switch result {
+                case .authorized:
+                    self.openPicker(in: vc, for: .photoLibrary) { image in
+                        handler(image)
+                    }
+                case .denied:
+                    /// temp
+                    presentSettingsAlert(in: vc)
+                }
+            }
+        }
+        
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+
+        alertVC.addAction(cameraAction)
+        alertVC.addAction(libraryAction)
+        alertVC.addAction(cancelAction)
+        
+        vc.present(alertVC, animated: true, completion: nil)
+    }
+}

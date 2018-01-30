@@ -27,11 +27,17 @@ final class ViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+      
+        /// optional customization
         imagePicker.settings = ImagePickerSettings(barTintColor: #colorLiteral(red: 0.2392156869, green: 0.6745098233, blue: 0.9686274529, alpha: 1), tintColor: .white, barStyle: .black)
     }
     
     @IBAction private func actionPickPhotoButton(_ sender: UIButton) {
+        
+        imagePicker.openPicker(in: self) { [weak self] image in
+            self?.photoImageView.image = image
+        }
+        
 //        imagePicker.requestCameraAccess { [weak self] result in
 //            guard let `self` = self else { return}
 //
@@ -46,21 +52,20 @@ final class ViewController: UIViewController {
 //                break
 //            }
 //        }
-
         
-        imagePicker.requestPhotoAccess { [weak self] result in
-            guard let `self` = self else { return}
-
-            switch result {
-            case .authorized:
-                self.imagePicker.openPicker(in: self, for: .photoLibrary) { [weak self] image in
-                    guard let `self` = self else { return}
-                    self.photoImageView.image = image
-                }
-            case .denied:
-                print("denied")
-                break
-            }
-        }
+//        imagePicker.requestPhotoAccess { [weak self] result in
+//            guard let `self` = self else { return}
+//
+//            switch result {
+//            case .authorized:
+//                self.imagePicker.openPicker(in: self, for: .photoLibrary) { [weak self] image in
+//                    guard let `self` = self else { return}
+//                    self.photoImageView.image = image
+//                }
+//            case .denied:
+//                print("denied")
+//                break
+//            }
+//        }
     }
 }
