@@ -58,6 +58,7 @@ final class ImagePicker: NSObject {
         let picker = UIImagePickerController()
         picker.delegate = self
         picker.sourceType = type
+        picker.modalPresentationStyle = .currentContext /// to turn on landscape mode
 //        picker.allowsEditing = true
         setupPickerBySettings(picker)
         return picker
