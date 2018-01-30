@@ -9,6 +9,9 @@
 /* Begin PBXBuildFile section */
 		6639B74B2020DA240074C9A3 /* SettingsRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6639B74A2020DA240074C9A3 /* SettingsRouter.swift */; };
 		6639B74E2020DDC30074C9A3 /* Сustomizable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6639B74D2020DDC30074C9A3 /* Сustomizable.swift */; };
+		663CF3202020E08F00F00ECC /* ImagePickerSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 663CF31F2020E08E00F00ECC /* ImagePickerSettings.swift */; };
+		663CF3222020E09C00F00ECC /* ImagePickerType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 663CF3212020E09C00F00ECC /* ImagePickerType.swift */; };
+		663CF3252020E31300F00ECC /* AccessStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 663CF3242020E31300F00ECC /* AccessStatus.swift */; };
 		666E281B201E561E00CDC5EF /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 666E281A201E561E00CDC5EF /* AppDelegate.swift */; };
 		666E281D201E561E00CDC5EF /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 666E281C201E561E00CDC5EF /* ViewController.swift */; };
 		666E2820201E561E00CDC5EF /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 666E281E201E561E00CDC5EF /* Main.storyboard */; };
@@ -31,6 +34,9 @@
 /* Begin PBXFileReference section */
 		6639B74A2020DA240074C9A3 /* SettingsRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsRouter.swift; sourceTree = "<group>"; };
 		6639B74D2020DDC30074C9A3 /* Сustomizable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Сustomizable.swift"; sourceTree = "<group>"; };
+		663CF31F2020E08E00F00ECC /* ImagePickerSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePickerSettings.swift; sourceTree = "<group>"; };
+		663CF3212020E09C00F00ECC /* ImagePickerType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePickerType.swift; sourceTree = "<group>"; };
+		663CF3242020E31300F00ECC /* AccessStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessStatus.swift; sourceTree = "<group>"; };
 		666E2817201E561E00CDC5EF /* Images.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Images.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		666E281A201E561E00CDC5EF /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		666E281C201E561E00CDC5EF /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -78,7 +84,7 @@
 			isa = PBXGroup;
 			children = (
 				669BA890201F7EB500F218B0 /* PhotoManager */,
-				669BA882201E7D3100F218B0 /* ImagePicker.swift */,
+				663CF3232020E17100F00ECC /* ImagePicker */,
 				6639B74A2020DA240074C9A3 /* SettingsRouter.swift */,
 				669BA884201E814600F218B0 /* ResponseResult.swift */,
 			);
@@ -115,6 +121,16 @@
 				6639B746201FD4F70074C9A3 /* Extensions */,
 			);
 			path = Support;
+			sourceTree = "<group>";
+		};
+		663CF3232020E17100F00ECC /* ImagePicker */ = {
+			isa = PBXGroup;
+			children = (
+				669BA882201E7D3100F218B0 /* ImagePicker.swift */,
+				663CF31F2020E08E00F00ECC /* ImagePickerSettings.swift */,
+				663CF3212020E09C00F00ECC /* ImagePickerType.swift */,
+			);
+			path = ImagePicker;
 			sourceTree = "<group>";
 		};
 		666E280E201E561E00CDC5EF = {
@@ -157,6 +173,7 @@
 			isa = PBXGroup;
 			children = (
 				669BA891201F7EB500F218B0 /* PhotoManager.swift */,
+				663CF3242020E31300F00ECC /* AccessStatus.swift */,
 				669BA892201F7EB500F218B0 /* PhotoManagerDelegate.swift */,
 			);
 			path = PhotoManager;
@@ -239,10 +256,12 @@
 				669BA87F201E7A1600F218B0 /* UIButton+Color.swift in Sources */,
 				666E283C201E59A900CDC5EF /* PhotoCell.swift in Sources */,
 				669BA880201E7A1600F218B0 /* UIColor+Adjust.swift in Sources */,
+				663CF3252020E31300F00ECC /* AccessStatus.swift in Sources */,
 				669BA885201E814700F218B0 /* ResponseResult.swift in Sources */,
 				669BA881201E7A1600F218B0 /* UIImage+Color.swift in Sources */,
 				666E283A201E594C00CDC5EF /* LocalPhotosController.swift in Sources */,
 				666E281D201E561E00CDC5EF /* ViewController.swift in Sources */,
+				663CF3202020E08F00F00ECC /* ImagePickerSettings.swift in Sources */,
 				6639B74B2020DA240074C9A3 /* SettingsRouter.swift in Sources */,
 				666E282F201E574F00CDC5EF /* UIApplication+Settings.swift in Sources */,
 				666E2831201E577900CDC5EF /* UIImage+Orientation.swift in Sources */,
@@ -250,6 +269,7 @@
 				666E281B201E561E00CDC5EF /* AppDelegate.swift in Sources */,
 				666E282D201E574600CDC5EF /* UICollectionView+Extensions.swift in Sources */,
 				6639B74E2020DDC30074C9A3 /* Сustomizable.swift in Sources */,
+				663CF3222020E09C00F00ECC /* ImagePickerType.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -9,6 +9,7 @@
 import UIKit
 
 final class SettingsRouter {
+    
     func openSettings() {
         guard
             let settingsUrl = URL(string: UIApplicationOpenSettingsURLString),

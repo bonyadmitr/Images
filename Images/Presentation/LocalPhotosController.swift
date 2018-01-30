@@ -21,7 +21,7 @@ final class LocalPhotosController: UIViewController {
             guard let `self` = self else { return }
             
             switch status {
-            case .authorized:
+            case .success:
                 self.photoManager.resetCachedAssets()
                 self.photoManager.delegate = self
                 self.photoManager.prepereForUse()

@@ -8,24 +8,12 @@
 
 import Photos
 
-enum PhotoManagerAuthorizationStatus {
-    case authorized
-    case denied
-}
-
-private extension UICollectionView {
-    func indexPathsForElements(in rect: CGRect) -> [IndexPath] {
-        let allLayoutAttributes = collectionViewLayout.layoutAttributesForElements(in: rect)!
-        return allLayoutAttributes.map { $0.indexPath }
-    }
-}
-
 final class PhotoManager: NSObject {
     
-    func requestPhotoAccess(handler: @escaping (_ status: PhotoManagerAuthorizationStatus) -> Void) {
+    func requestPhotoAccess(handler: @escaping (_ status: AccessStatus) -> Void) {
         switch PHPhotoLibrary.authorizationStatus() {
         case .authorized:
-            handler(.authorized)
+            handler(.success)
         case .denied, .restricted:
             handler(.denied)
         case .notDetermined:
@@ -33,7 +21,7 @@ final class PhotoManager: NSObject {
                 switch status {
                 case .authorized:
                     self.photoLibrary.register(self)
-                    handler(.authorized)
+                    handler(.success)
                 case .denied, .restricted:
                     handler(.denied)
                 case .notDetermined:
@@ -116,21 +104,12 @@ final class PhotoManager: NSObject {
     private lazy var photoLibrary = PHPhotoLibrary.shared()
     internal lazy var cachingManager = PHCachingImageManager()
     
-    //static let shared = PhotoManager()
-    
     var photoSize = PHImageManagerMaximumSize
     
     
     var fetchResult: PHFetchResult<PHAsset>!
     
     weak var delegate: PhotoManagerDelegate?
-    
-    //    override init() {
-    //        super.init()
-    //
-    //    }
-    
-    
     
     lazy var requestOptions: PHImageRequestOptions = {
         let requestOptions = PHImageRequestOptions()
@@ -177,9 +156,10 @@ final class PhotoManager: NSObject {
     //    }
     
     /// https://stackoverflow.com/questions/40854886/swift-take-a-photo-and-save-to-photo-library
-    func saveToLibrary(_ image: UIImage) {
-        UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil)
-    }
+    /// temp
+//    func saveToLibrary(_ image: UIImage) {
+//        UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil)
+//    }
     
     deinit {
         photoLibrary.unregisterChangeObserver(self)
@@ -202,5 +182,14 @@ extension PhotoManager: PHPhotoLibraryChangeObserver {
             self.delegate?.photoLibraryDidChange(with: changes)
             resetCachedAssets()
         }
+    }
+}
+
+// MARK: - UICollectionView+IndexPath
+
+private extension UICollectionView {
+    func indexPathsForElements(in rect: CGRect) -> [IndexPath] {
+        let allLayoutAttributes = collectionViewLayout.layoutAttributesForElements(in: rect)!
+        return allLayoutAttributes.map { $0.indexPath }
     }
 }
