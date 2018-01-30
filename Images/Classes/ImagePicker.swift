@@ -9,13 +9,15 @@
 import AVFoundation
 import Photos
 
-/// create for camera
-/// create defalt alert
-/// create alert sheet
-
-/// openPhoto
-/// openCamera ???
-/// openCameraPicker ???
+/**
+add to Info.plist
+1) Camera
+NSCameraUsageDescription
+2) Photo Library
+NSPhotoLibraryUsageDescription
+Example text:
+Please allow access to save photo in your photo library
+ */
 
 //typealias ResponseImage = (ResponseResult<UIImage>) -> Void
 typealias ResponseImage = (_ image: UIImage) -> Void
