@@ -41,6 +41,7 @@ final class ImagePicker: NSObject {
             return
         }
         
+        /// only .camera is not available in simulator
         guard UIImagePickerController.isSourceTypeAvailable(imagePickerType) else {
             return print("- not Available \(imagePickerType)")
         }
