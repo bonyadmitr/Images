@@ -27,7 +27,7 @@ extension PhotoManager {
         }
         cell.representedAssetIdentifier = asset.localIdentifier
         
-        cachingManager.requestImage(for: asset, targetSize: photoSize, contentMode: .default, options: nil, resultHandler: { image, _ in
+        cachingManager.requestImage(for: asset, targetSize: photoSize, contentMode: .default, options: requestOptions, resultHandler: { image, _ in
             /// The cell may have been recycled by the time this handler gets called;
             /// set the cell's thumbnail image only if it's still showing the same asset.
             if cell.representedAssetIdentifier == asset.localIdentifier, image != nil {

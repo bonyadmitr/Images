@@ -10,30 +10,39 @@ import Photos
 
 final class PhotoManager: NSObject {
     
-    func requestPhotoAccess(handler: @escaping (_ status: AccessStatus) -> Void) {
-        switch PHPhotoLibrary.authorizationStatus() {
-        case .authorized:
-            handler(.success)
-        case .denied, .restricted:
-            handler(.denied)
-        case .notDetermined:
-            PHPhotoLibrary.requestAuthorization() { status in
-                switch status {
-                case .authorized:
-                    handler(.success)
-                case .denied, .restricted:
-                    handler(.denied)
-                case .notDetermined:
-                    /// won't happen but still
-                    handler(.denied)
-                }
-            }
-        }
-    }
+    // MARK: - Main
     
-    // MARK: - Asset Caching
+    var photoSize = PHImageManagerMaximumSize
+    var fetchResult: PHFetchResult<PHAsset>?
+    
+    weak var delegate: PhotoManagerDelegate?
+    
+    private lazy var photoLibrary = PHPhotoLibrary.shared()
+    internal lazy var cachingManager = PHCachingImageManager()
     
     private var previousPreheatRect = CGRect.zero
+    
+    lazy var requestOptions: PHImageRequestOptions = {
+        let options = PHImageRequestOptions()
+        options.isSynchronous = true
+        options.deliveryMode = .highQualityFormat
+        return options
+    }()
+    
+    func prepereForUse() {
+        photoLibrary.register(self)
+        let allPhotosOptions = PHFetchOptions()
+        allPhotosOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: true)]
+        fetchResult = PHAsset.fetchAssets(with: allPhotosOptions)
+    }
+    
+    deinit {
+        photoLibrary.unregisterChangeObserver(self)
+    }
+}
+
+// MARK: - Asset Caching
+extension PhotoManager {
     
     func updateCachedAssetsFor(view: UIView, collectionView: UICollectionView) {
         // Update only if the view is visible.
@@ -58,9 +67,9 @@ final class PhotoManager: NSObject {
         
         // Update the assets the PHCachingImageManager is caching.
         cachingManager.startCachingImages(for: addedAssets,
-                                        targetSize: photoSize, contentMode: .aspectFill, options: nil)
+                                          targetSize: photoSize, contentMode: .aspectFill, options: nil)
         cachingManager.stopCachingImages(for: removedAssets,
-                                       targetSize: photoSize, contentMode: .aspectFill, options: nil)
+                                         targetSize: photoSize, contentMode: .aspectFill, options: nil)
         
         // Store the preheat rect to compare against in the future.
         previousPreheatRect = preheatRect
@@ -96,38 +105,7 @@ final class PhotoManager: NSObject {
         cachingManager.stopCachingImagesForAllAssets()
         previousPreheatRect = .zero
     }
-    
-    // MARK: - Main
-    
-    private lazy var photoLibrary = PHPhotoLibrary.shared()
-    internal lazy var cachingManager = PHCachingImageManager()
-    
-    var photoSize = PHImageManagerMaximumSize
-    
-    
-    var fetchResult: PHFetchResult<PHAsset>?
-    
-    weak var delegate: PhotoManagerDelegate?
-    
-    lazy var requestOptions: PHImageRequestOptions = {
-        let options = PHImageRequestOptions()
-        options.isSynchronous = true
-        options.deliveryMode = .highQualityFormat
-        return options
-    }()
-    
-    func prepereForUse() {
-        photoLibrary.register(self)
-        let allPhotosOptions = PHFetchOptions()
-        allPhotosOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: true)]
-        fetchResult = PHAsset.fetchAssets(with: allPhotosOptions)
-    }
-    
-    deinit {
-        photoLibrary.unregisterChangeObserver(self)
-    }
 }
-
 
 extension PhotoManager: PHPhotoLibraryChangeObserver {
     func photoLibraryDidChange(_ changeInstance: PHChange) {
@@ -140,8 +118,8 @@ extension PhotoManager: PHPhotoLibraryChangeObserver {
             return
         }
         
-        // Change notifications may be made on a background queue. Re-dispatch to the
-        // main queue before acting on the change as we'll be updating the UI.
+        /// Change notifications may be made on a background queue. Re-dispatch to the
+        /// main queue before acting on the change as we'll be updating the UI.
         DispatchQueue.main.sync {
             // Hang on to the new fetch result.
             self.fetchResult = changes.fetchResultAfterChanges

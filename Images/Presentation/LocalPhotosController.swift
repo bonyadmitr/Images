@@ -12,12 +12,13 @@ final class LocalPhotosController: UIViewController {
     
     @IBOutlet weak var collectionView: UICollectionView!
     private lazy var photoManager = PhotoManager()
+    private lazy var permissionsManager = PermissionsManager()
     private lazy var settingsRouter = SettingsRouter()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        photoManager.requestPhotoAccess { [weak self] status in
+        permissionsManager.requestPhotoAccess { [weak self] status in
             guard let `self` = self else { return }
             
             switch status {

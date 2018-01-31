@@ -6,11 +6,7 @@
 //  Copyright © 2018 Bondar Yaroslav. All rights reserved.
 //
 
-import AVFoundation
 import Photos
-
-/// open another picker
-/// reuse requestPhotoAccess
 
 typealias ResponseImage = (_ image: UIImage) -> Void
 
@@ -31,6 +27,7 @@ final class ImagePicker: NSObject {
     var settings: ImagePickerSettings?
     
     private lazy var settingsRouter = SettingsRouter()
+    private lazy var permissionsManager = PermissionsManager()
     
     private var handler: ResponseImage?
     
@@ -58,7 +55,8 @@ final class ImagePicker: NSObject {
         let picker = UIImagePickerController()
         picker.delegate = self
         picker.sourceType = type
-        picker.modalPresentationStyle = .currentContext /// to turn on landscape mode
+        picker.modalPresentationStyle = .overCurrentContext /// to turn on landscape mode
+        picker.modalPresentationCapturesStatusBarAppearance = true
 //        picker.allowsEditing = true
         setupPickerBySettings(picker)
         return picker
@@ -101,53 +99,12 @@ extension ImagePicker: UIImagePickerControllerDelegate, UINavigationControllerDe
 }
 
 extension ImagePicker {
-    
-    func requestCameraAccess(handler: @escaping (_ status: AccessStatus) -> Void) {
-        switch AVCaptureDevice.authorizationStatus(for: .video) {
-        case .authorized:
-            handler(.success)
-        case .denied, .restricted:
-            handler(.denied)
-        case .notDetermined:
-            AVCaptureDevice.requestAccess(for: .video) { granted in
-                if granted {
-                    handler(.success)
-                } else {
-                    handler(.denied)
-                }
-            }
-        }
-    }
-    
-    func requestPhotoAccess(handler: @escaping (_ status: AccessStatus) -> Void) {
-        switch PHPhotoLibrary.authorizationStatus() {
-        case .authorized:
-            handler(.success)
-        case .denied, .restricted:
-            handler(.denied)
-        case .notDetermined:
-            PHPhotoLibrary.requestAuthorization() { status in
-                switch status {
-                case .authorized:
-                    handler(.success)
-                case .denied, .restricted:
-                    handler(.denied)
-                case .notDetermined:
-                    /// won't happen but still
-                    handler(.denied)
-                }
-            }
-        }
-    }
-}
-
-extension ImagePicker {
     func openPicker(in vc: UIViewController, handler: @escaping ResponseImage) {
         
         let alertVC = UIAlertController(title: "Choose source", message: nil, preferredStyle: .actionSheet)
         
         let cameraAction = UIAlertAction(title: "Camera", style: .default) { _ in
-            self.requestCameraAccess { [weak self] result in
+            self.permissionsManager.requestCameraAccess { [weak self] result in
                 guard let `self` = self else { return }
                 
                 switch result {
@@ -162,7 +119,7 @@ extension ImagePicker {
         }
         
         let libraryAction = UIAlertAction(title: "Photo library", style: .default) { _ in
-            self.requestPhotoAccess { [weak self] result in
+            self.permissionsManager.requestPhotoAccess { [weak self] result in
                 guard let `self` = self else { return}
                 
                 switch result {
