@@ -24,8 +24,9 @@ final class PhotoManager: NSObject {
     
     lazy var requestOptions: PHImageRequestOptions = {
         let options = PHImageRequestOptions()
-        options.isSynchronous = true
         options.deliveryMode = .highQualityFormat
+        options.isNetworkAccessAllowed = true
+        options.isSynchronous = true
         return options
     }()
     
@@ -44,9 +45,9 @@ final class PhotoManager: NSObject {
 // MARK: - Asset Caching
 extension PhotoManager {
     
-    func updateCachedAssetsFor(view: UIView, collectionView: UICollectionView) {
+    func updateCachedAssetsFor(collectionView: UICollectionView) {
         // Update only if the view is visible.
-        guard view.window != nil else { return }
+        guard let view = collectionView.superview, view.window != nil else { return }
         
         // The preheat window is twice the height of the visible rect.
         let visibleRect = CGRect(origin: collectionView.contentOffset, size: collectionView.bounds.size)

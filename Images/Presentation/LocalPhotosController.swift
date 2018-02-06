@@ -26,7 +26,9 @@ final class LocalPhotosController: UIViewController {
                 self.photoManager.resetCachedAssets()
                 self.photoManager.delegate = self
                 self.photoManager.prepereForUse()
-                self.collectionView.reloadData()
+                DispatchQueue.main.async {
+                    self.collectionView.reloadData()
+                }
             case .denied:
                 self.settingsRouter.presentSettingsAlertForPhotoAccess(in: self)
             }
@@ -45,7 +47,7 @@ final class LocalPhotosController: UIViewController {
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        photoManager.updateCachedAssetsFor(view: view, collectionView: collectionView)
+        photoManager.updateCachedAssetsFor(collectionView: collectionView)
     }
     
     /// View controller-based status bar appearance
@@ -81,7 +83,7 @@ extension LocalPhotosController: UICollectionViewDelegate {
 }
 extension LocalPhotosController: UIScrollViewDelegate {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        photoManager.updateCachedAssetsFor(view: view, collectionView: collectionView)
+        photoManager.updateCachedAssetsFor(collectionView: collectionView)
     }
 }
 
