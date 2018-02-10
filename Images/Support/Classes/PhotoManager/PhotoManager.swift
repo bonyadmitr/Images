@@ -17,10 +17,15 @@ final class PhotoManager: NSObject {
     
     weak var delegate: PhotoManagerDelegate?
     
-    private lazy var photoLibrary = PHPhotoLibrary.shared()
-    internal lazy var cachingManager = PHCachingImageManager()
-    
     private var previousPreheatRect = CGRect.zero
+    
+    private lazy var photoLibrary = PHPhotoLibrary.shared()
+    
+    internal lazy var cachingManager: PHCachingImageManager = {
+        let cachingManager = PHCachingImageManager()
+        cachingManager.allowsCachingHighQualityImages = false
+        return cachingManager
+    }()
     
     lazy var requestOptions: PHImageRequestOptions = {
         let options = PHImageRequestOptions()
