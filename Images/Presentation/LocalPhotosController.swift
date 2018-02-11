@@ -15,6 +15,8 @@ final class LocalPhotosController: UIViewController {
     private lazy var permissionsManager = PermissionsManager()
     private lazy var settingsRouter = SettingsRouter()
     
+    private let photoViewerSegue = "PhotoViewer"
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -50,16 +52,25 @@ final class LocalPhotosController: UIViewController {
         photoManager.updateCachedAssetsFor(collectionView: collectionView)
     }
     
-    /// View controller-based status bar appearance
-    override var prefersStatusBarHidden: Bool {
-        return true
-    }
-    
     /// Determine the size of the thumbnails to request from the PHCachingImageManager
     private func updateItemSize() {
         let size = saveAndGetItemSize(for: collectionView)
         let scale = UIScreen.main.scale
         photoManager.photoSize = CGSize(width: size.width * scale, height: size.height * scale)
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        super.prepare(for: segue, sender: sender)
+        
+        guard segue.identifier == photoViewerSegue,
+            let vc = segue.destination as? PhotoViewerController,
+            let indexPath = sender as? IndexPath,
+            let asset = photoManager.fetchResult?[indexPath.item]
+        else {
+            return
+        }
+        
+        vc.asset = asset
     }
 }
 
@@ -78,7 +89,7 @@ extension LocalPhotosController: UICollectionViewDataSource {
 }
 extension LocalPhotosController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        print(indexPath.row)
+        performSegue(withIdentifier: photoViewerSegue, sender: indexPath)
     }
 }
 extension LocalPhotosController: UIScrollViewDelegate {
