@@ -9,6 +9,9 @@
 import UIKit
 import Photos
 
+
+import MobileCoreServices
+
 /// need send image or imageView for long downloads
 
 final class PhotoViewerController: UIViewController {
@@ -120,13 +123,185 @@ final class PhotoViewerController: UIViewController {
             if let data = data {
                 print(data.sizeString)
                 
+                
                 if let fileName = (info?["PHImageFileURLKey"] as? URL)?.lastPathComponent {
                     print("///////" + fileName + "////////")
                     //do sth with file name
                 }
+                
+                if let ciImage = CIImage(data: data) {
+                    print(ciImage.properties)
+                }
+                
+                
+                let qqq = NSMutableDictionary()
+                qqq["1111111111111111111"] = "1111111111111111111"
+                let path = (info?["PHImageFileURLKey"] as? URL)!
+                
+                
+                let qdata = NSMutableData(data: data)
+                
+                let z = self.saveImage(qdata, withMetadata: qqq, atPath: path)
+                print(z)
+                print(CIImage(data: qdata as Data)?.properties ?? "nil")
+                print()
+                
+                
             }
         }
+        
+        
+        
+        
+//        let options = PHContentEditingInputRequestOptions()
+//        options.networkAccessAllowed = true //download asset metadata from iCloud if needed
+//
+//        asset.requestContentEditingInputWithOptions(options) { (contentEditingInput: PHContentEditingInput?, _) -> Void in
+//            let fullImage = CIImage(contentsOfURL: contentEditingInput!.fullSizeImageURL)
+//
+//            print(fullImage.properties)
+//        }
     }
+    
+    
+    @IBAction func actionClearBarButton(_ sender: UIBarButtonItem) {
+    
+        
+        
+    }
+    
+    private func clearMetadata() {
+        guard let asset = asset else {
+            return
+        }
+        
+        let options = PHContentEditingInputRequestOptions()
+        options.isNetworkAccessAllowed = true
+        // Load metadata for asset:
+        asset.requestContentEditingInput(with: options) { contentEditingInput, _ in
+            guard
+                let url = contentEditingInput!.fullSizeImageURL,
+                let fullImage = CIImage(contentsOf: url)
+            else {
+                return
+            }
+            
+            
+            
+            let resources = PHAssetResource.assetResources(for: asset)
+            guard let avAsset = resources.first else {
+                return
+            }
+            
+//            guard let exportSession = AVAssetExportSession(asset: avAsset, presetName: AVAssetExportPresetPassthrough) else { return }
+//
+//            var mutableMetadata = exportSession.asset.metadata
+//            let metadataCopy = mutableMetadata
+
+            
+//            fullImage.properties = [:]
+            
+            
+            
+//            var date: NSDate? = nil
+//            // Parse the date from the EXIF data:
+//            if let dateTimeString = fullImage!.properties["{Exif}"]?["DateTimeOriginal"] as? String {
+//                date = xifDateFormatter.dateFromString(dateTimeString)
+//            }
+//            // Parse the 2D location from the GPS data:
+//            var location: CLLocation? = nil
+//            if let gps = fullImage?.properties["{GPS}"] {
+//                var latitude: CLLocationDegrees? = nil
+//                if let latitudeRaw = gps["Latitude"] as? CLLocationDegrees, latitudeRef = gps["LatitudeRef"] as? String {
+//                    let sign = ((latitudeRef == "N") ? 1 : -1)
+//                    latitude = CLLocationDegrees(Double(sign) * Double(latitudeRaw))
+//                }
+//                var longitude: CLLocationDegrees? = nil
+//                if let longitudeRaw = gps["Longitude"] as? CLLocationDegrees, longitudeRef = gps["LongitudeRef"] as? String {
+//                    let sign = ((longitudeRef == "E") ? 1 : -1)
+//                    longitude = CLLocationDegrees(Double(sign) * Double(longitudeRaw))
+//                }
+//                if latitude != nil && longitude != nil {
+//                    location = CLLocation(latitude: latitude!, longitude: longitude!)
+//                }
+//            }
+//            self.captionPhoto(ImageWithMeta(photo: photo, location: location, date: date))
+        }
+
+    }
+    
+    
+    
+    
+    ///https://developer.apple.com/library/content/qa/qa1895/_index.html
+    ///https://gist.github.com/kwylez/a4b6ec261e52970e1fa5dd4ccfe8898f
+    
+    /// Generate Metadata Exif for GPS
+    ///https://gist.github.com/nitrag/343fe13f01bb0ef3692f2ae2dfe33e86
+    
+    /// parse location
+    /// https://gist.github.com/kkleidal/73401405f7d5fd168d061ad0c154ea18
+    
+    
+    
+    /// https://stackoverflow.com/a/42818232
+    func saveImage(_ data: NSMutableData, withMetadata metadata: NSMutableDictionary, atPath path: URL) -> Bool {
+//        guard let jpgData = UIImageJPEGRepresentation(image, 1) else {
+//            return false
+//        }
+        // make an image source
+        guard let source = CGImageSourceCreateWithData(data as CFData, nil), let uniformTypeIdentifier = CGImageSourceGetType(source) else {
+            return false
+        }
+        
+        
+        
+        // make an image destination pointing to the file we want to write
+        guard let destination = CGImageDestinationCreateWithData(data, uniformTypeIdentifier, 1, nil) else {
+            return false
+        }
+        
+        // add the source image to the destination, along with the metadata
+        CGImageDestinationAddImageFromSource(destination, source, 0, metadata)
+        
+        // and write it out
+        return CGImageDestinationFinalize(destination)
+    }
+
+    
+    /// https://medium.com/@emiswelt/exporting-images-with-metadata-to-the-photo-gallery-in-swift-3-ios-10-66210bbad5d2
+    ///
+    // Take care when passing the paths. The directory must exist.
+    // let path = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).first! + "/"
+    // let filePath = path + name + ".jpg"
+    // try! FileManager.default.createDirectory(atPath: path, withIntermediateDirectories: true, attributes: nil)
+    // saveToPhotoAlbumWithMetadata(image, filePath: filePath)
+    static func saveToPhotoAlbumWithMetadata(_ image: CGImage, filePath: String) {
+        
+        let cfPath = CFURLCreateWithFileSystemPath(nil, filePath as CFString, CFURLPathStyle.cfurlposixPathStyle, false)
+        
+        // You can change your exif type here.
+        let destination = CGImageDestinationCreateWithURL(cfPath!, kUTTypeJPEG, 1, nil)
+        
+        // Place your metadata here.
+        // Keep in mind that metadata follows a standard. You can not use custom property names here.
+        let tiffProperties = [
+            kCGImagePropertyTIFFMake as String: "Your camera vendor",
+            kCGImagePropertyTIFFModel as String: "Your camera model"
+            ] as CFDictionary
+        
+        let properties = [
+            kCGImagePropertyExifDictionary as String: tiffProperties
+            ] as CFDictionary
+        
+        CGImageDestinationAddImage(destination!, image, properties)
+        CGImageDestinationFinalize(destination!)
+        
+        try? PHPhotoLibrary.shared().performChangesAndWait {
+            PHAssetChangeRequest.creationRequestForAssetFromImage(atFileURL: URL(fileURLWithPath: filePath))
+        }
+    }
+
 }
 
 extension PhotoViewerController: UIScrollViewDelegate {
