@@ -164,9 +164,15 @@
                             <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="PYe-aZ-KMa">
                                 <rect key="frame" x="0.0" y="436" width="320" height="44"/>
                                 <items>
-                                    <barButtonItem title="Clear" id="AqO-jv-0gW">
+                                    <barButtonItem systemItem="trash" id="AqO-jv-0gW">
                                         <connections>
-                                            <action selector="actionClearBarButton:" destination="9uL-BQ-pSh" id="U3P-Fx-oiK"/>
+                                            <action selector="actionDeleteBarButton:" destination="9uL-BQ-pSh" id="tep-QE-mAD"/>
+                                        </connections>
+                                    </barButtonItem>
+                                    <barButtonItem style="plain" systemItem="flexibleSpace" id="bn2-RK-wic"/>
+                                    <barButtonItem title="Like" id="3Qv-CF-JNT">
+                                        <connections>
+                                            <action selector="actionFavoriteBarButton:" destination="9uL-BQ-pSh" id="rD3-hR-Kac"/>
                                         </connections>
                                     </barButtonItem>
                                 </items>
@@ -194,6 +200,7 @@
                         <viewLayoutGuide key="safeArea" id="1uH-ND-yYG"/>
                     </view>
                     <connections>
+                        <outlet property="favoriteBarButton" destination="3Qv-CF-JNT" id="Pvw-sT-9eX"/>
                         <outlet property="imageScrollView" destination="Zvj-5l-nUR" id="CSr-fx-TpW"/>
                         <outlet property="progressView" destination="UKK-9r-14S" id="hcH-c5-Mms"/>
                     </connections>

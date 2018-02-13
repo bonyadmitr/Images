@@ -36,6 +36,9 @@
 		669BA885201E814700F218B0 /* ResponseResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 669BA884201E814600F218B0 /* ResponseResult.swift */; };
 		669BA893201F7EB600F218B0 /* PhotoManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 669BA891201F7EB500F218B0 /* PhotoManager.swift */; };
 		669BA894201F7EB600F218B0 /* PhotoManagerDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 669BA892201F7EB500F218B0 /* PhotoManagerDelegate.swift */; };
+		66EAE502203353C300A07DBC /* PHAsset+Properties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66EAE501203353C300A07DBC /* PHAsset+Properties.swift */; };
+		66EAE504203353DB00A07DBC /* Data+Size.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66EAE503203353DB00A07DBC /* Data+Size.swift */; };
+		66EAE50A20335E8700A07DBC /* UINavigationController+Bugs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66EAE50920335E8700A07DBC /* UINavigationController+Bugs.swift */; };
 		CED7F3092021986F00422167 /* PermissionsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED7F3082021986F00422167 /* PermissionsManager.swift */; };
 /* End PBXBuildFile section */
 
@@ -71,6 +74,11 @@
 		669BA884201E814600F218B0 /* ResponseResult.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ResponseResult.swift; sourceTree = "<group>"; };
 		669BA891201F7EB500F218B0 /* PhotoManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhotoManager.swift; sourceTree = "<group>"; };
 		669BA892201F7EB500F218B0 /* PhotoManagerDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhotoManagerDelegate.swift; sourceTree = "<group>"; };
+		66EAE501203353C300A07DBC /* PHAsset+Properties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PHAsset+Properties.swift"; sourceTree = "<group>"; };
+		66EAE503203353DB00A07DBC /* Data+Size.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Data+Size.swift"; sourceTree = "<group>"; };
+		66EAE505203353F900A07DBC /* FormattersTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormattersTest.swift; sourceTree = "<group>"; };
+		66EAE5072033544800A07DBC /* ImageMetadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageMetadata.swift; sourceTree = "<group>"; };
+		66EAE50920335E8700A07DBC /* UINavigationController+Bugs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UINavigationController+Bugs.swift"; sourceTree = "<group>"; };
 		CED7F3082021986F00422167 /* PermissionsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionsManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -93,6 +101,9 @@
 				666E2830201E577900CDC5EF /* UIImage+Orientation.swift */,
 				666E282C201E574600CDC5EF /* UICollectionView+Extensions.swift */,
 				667DCCC920305758002168A3 /* UITableView+Extensions.swift */,
+				66EAE501203353C300A07DBC /* PHAsset+Properties.swift */,
+				66EAE503203353DB00A07DBC /* Data+Size.swift */,
+				66EAE50920335E8700A07DBC /* UINavigationController+Bugs.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -106,6 +117,8 @@
 				669BA884201E814600F218B0 /* ResponseResult.swift */,
 				CED7F3082021986F00422167 /* PermissionsManager.swift */,
 				663CF32C2022373500F00ECC /* ImageManager.swift */,
+				66EAE505203353F900A07DBC /* FormattersTest.swift */,
+				66EAE5072033544800A07DBC /* ImageMetadata.swift */,
 			);
 			path = Classes;
 			sourceTree = "<group>";
@@ -286,10 +299,12 @@
 				663CF32720222A0A00F00ECC /* CustomErrors.swift in Sources */,
 				667DCCCA20305758002168A3 /* UITableView+Extensions.swift in Sources */,
 				669BA881201E7A1600F218B0 /* UIImage+Color.swift in Sources */,
+				66EAE502203353C300A07DBC /* PHAsset+Properties.swift in Sources */,
 				663CF32D2022373500F00ECC /* ImageManager.swift in Sources */,
 				666E283A201E594C00CDC5EF /* LocalPhotosController.swift in Sources */,
 				666E281D201E561E00CDC5EF /* ViewController.swift in Sources */,
 				CED7F3092021986F00422167 /* PermissionsManager.swift in Sources */,
+				66EAE50A20335E8700A07DBC /* UINavigationController+Bugs.swift in Sources */,
 				663CF3202020E08F00F00ECC /* ImagePickerSettings.swift in Sources */,
 				667DCCC820305681002168A3 /* LibraryController.swift in Sources */,
 				6639B74B2020DA240074C9A3 /* SettingsRouter.swift in Sources */,
@@ -299,6 +314,7 @@
 				666E281B201E561E00CDC5EF /* AppDelegate.swift in Sources */,
 				667DCCC6202F7113002168A3 /* PhotoViewerController.swift in Sources */,
 				666E282D201E574600CDC5EF /* UICollectionView+Extensions.swift in Sources */,
+				66EAE504203353DB00A07DBC /* Data+Size.swift in Sources */,
 				667DCCC4202F70AD002168A3 /* ImageScrollView.swift in Sources */,
 				6639B74E2020DDC30074C9A3 /* Сustomizable.swift in Sources */,
 				663CF3222020E09C00F00ECC /* ImagePickerType.swift in Sources */,

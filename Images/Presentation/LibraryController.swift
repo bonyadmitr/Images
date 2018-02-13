@@ -28,10 +28,19 @@ final class LibraryController: UIViewController {
 //    }
     
     let sectionLocalizedTitles = ["", NSLocalizedString("Smart Albums", comment: ""), NSLocalizedString("Albums", comment: "")]
-
     
     var allPhotos: PHFetchResult<PHAsset>!
-    var smartAlbums: PHFetchResult<PHAssetCollection>!
+    var smartAlbums: PHFetchResult<PHAssetCollection>! {
+        didSet {
+            smartAlbumsFetchAssets.removeAll()
+            
+            smartAlbums.enumerateObjects { [weak self] collection, _, _ in
+                guard let `self` = self else { return }
+                let fetchAssets = collection.fetchAssets(of: .image)
+                self.smartAlbumsFetchAssets.append(fetchAssets)
+            }
+        }
+    }
     var userCollections: PHFetchResult<PHCollection>!
     
     var smartAlbumsFetchAssets: [PHFetchResult<PHAsset>] = []
@@ -49,13 +58,8 @@ final class LibraryController: UIViewController {
         smartAlbums = PHAssetCollection.fetchAssetCollections(with: .smartAlbum, subtype: .albumRegular, options: nil)
         userCollections = PHCollectionList.fetchTopLevelUserCollections(with: nil)
         
-        smartAlbums.enumerateObjects { [weak self] collection, _, _ in
-            guard let `self` = self else { return }
-            let fetchAssets = collection.fetchAssets(of: .image)
-            self.smartAlbumsFetchAssets.append(fetchAssets)
-        }
-        
         PHPhotoLibrary.shared().register(self)
+        tableView.reloadData()
     }
     
     deinit {
@@ -115,7 +119,7 @@ extension LibraryController: PHPhotoLibraryChangeObserver {
         // Change notifications may be made on a background queue. Re-dispatch to the
         // main queue before acting on the change as we'll be updating the UI.
         DispatchQueue.main.sync {
-            // Check each of the three top-level fetches for changes.
+            /// Check each of the three top-level fetches for changes.
             
             /// allPhotos
             if let changeDetails = changeInstance.changeDetails(for: allPhotos) {
@@ -123,20 +127,21 @@ extension LibraryController: PHPhotoLibraryChangeObserver {
                 tableView.reloadSections(IndexSet(integer: Section.allPhotos.rawValue), with: .automatic)
             }
             
-            
             /// smartAlbums
             if let changeDetails = changeInstance.changeDetails(for: smartAlbums) {
                 smartAlbums = changeDetails.fetchResultAfterChanges
                 tableView.reloadSections(IndexSet(integer: Section.smartAlbums.rawValue), with: .automatic)
-            }
-            
-            for var fetchAssets in smartAlbumsFetchAssets {
-                if let changeDetails = changeInstance.changeDetails(for: fetchAssets) {
-                    fetchAssets = changeDetails.fetchResultAfterChanges
+            } else {
+                /// update smartAlbums fetches
+                for i in 0..<smartAlbumsFetchAssets.count {
+                    let fetchAssets = smartAlbumsFetchAssets[i]
+                    if let changeDetails = changeInstance.changeDetails(for: fetchAssets) {
+                        smartAlbumsFetchAssets[i] = changeDetails.fetchResultAfterChanges
+                        /// can be checked for changes and reload only one time
+                        tableView.reloadSections(IndexSet(integer: Section.smartAlbums.rawValue), with: .automatic)
+                    }
                 }
             }
-            tableView.reloadSections(IndexSet(integer: Section.smartAlbums.rawValue), with: .automatic)
-            
             
             /// userCollections
             if let changeDetails = changeInstance.changeDetails(for: userCollections) {
@@ -148,6 +153,7 @@ extension LibraryController: PHPhotoLibraryChangeObserver {
 }
 
 extension PHAssetCollection {
+    /// if mediaType set .unknown, means fetch all objects
     func fetchAssets(of mediaType: PHAssetMediaType) -> PHFetchResult<PHAsset> {
         if mediaType == .unknown {
             return PHAsset.fetchAssets(in: self, options: nil)

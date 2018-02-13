@@ -18,6 +18,7 @@ protocol PhotoManagerColectionViewDelegate: PhotoManagerDelegate {
 
 extension PhotoManagerDelegate where Self: PhotoManagerColectionViewDelegate {
     func photoLibraryDidChange(with changes: PHFetchResultChangeDetails<PHAsset>) {
+
         if changes.hasIncrementalChanges {
             // If we have incremental diffs, animate them in the collection view.
             collectionView.performBatchUpdates({
@@ -37,6 +38,31 @@ extension PhotoManagerDelegate where Self: PhotoManagerColectionViewDelegate {
                                                  to: IndexPath(item: toIndex, section: 0))
                 }
             })
+            
+            
+            
+//            collectionView.performBatchUpdates({
+//                // For indexes to make sense, updates must be in this order:
+//                // delete, insert, reload, move
+//                if let removed = changes.removedIndexes, !removed.isEmpty {
+//                    collectionView.deleteItems(at: removed.map({ IndexPath(item: $0, section: 0) }))
+//                }
+//                if let inserted = changes.insertedIndexes, !inserted.isEmpty {
+//                    collectionView.insertItems(at: inserted.map({ IndexPath(item: $0, section: 0) }))
+//                }
+//
+//            }, completion: { _ in
+//                if let changed = changes.changedIndexes, !changed.isEmpty {
+//                    self.collectionView.reloadItems(at: changed.map({ IndexPath(item: $0, section: 0) }))
+//                }
+//                changes.enumerateMoves { fromIndex, toIndex in
+//                    guard fromIndex != toIndex else {
+//                        return
+//                    }
+//                    self.collectionView.moveItem(at: IndexPath(item: fromIndex, section: 0),
+//                                                 to: IndexPath(item: toIndex, section: 0))
+//                }
+//            })
         } else {
             //Reload the collection view if incremental diffs are not available.
             collectionView.reloadData()

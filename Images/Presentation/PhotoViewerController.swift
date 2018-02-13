@@ -9,15 +9,14 @@
 import UIKit
 import Photos
 
-
-import MobileCoreServices
-
 /// need send image or imageView for long downloads
+/// PHAdjustmentData
 
 final class PhotoViewerController: UIViewController {
     
     @IBOutlet weak var progressView: UIProgressView!
     @IBOutlet weak var imageScrollView: ImageScrollView!
+    @IBOutlet weak var favoriteBarButton: UIBarButtonItem!
     
     var asset: PHAsset?
     private var requestID: PHImageRequestID?
@@ -25,24 +24,10 @@ final class PhotoViewerController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        PHPhotoLibrary.shared().register(self)
+        
         progressView.progress = 0
         imageScrollView.delegate = self
-        
-        
-        /// update asset
-        /// https://developer.apple.com/documentation/photos/phassetcollection
-//        guard let asset = asset else {
-//            return
-//        }
-//        let fetchResult = PHAssetCollection.fetchAssetCollectionsContaining(asset, with: .smartAlbum, options: nil)
-//        guard let collecttion = fetchResult.firstObject else {
-//            return
-//        }
-//        collecttion.estimatedAssetCount
-        
-        
-
-        
         
         updateStillImage()
     }
@@ -53,9 +38,12 @@ final class PhotoViewerController: UIViewController {
     }
     
     deinit {
+        print("- deinit PhotoViewerController")
+        /// optimization for big images
         if let requestID = requestID {
             PHImageManager.default().cancelImageRequest(requestID)
         }
+        
         PHPhotoLibrary.shared().unregisterChangeObserver(self)
     }
     
@@ -63,6 +51,9 @@ final class PhotoViewerController: UIViewController {
         guard let asset = asset else {
             return
         }
+        
+        favoriteBarButton.title = asset.isFavorite ? "♥︎" : "♡"
+        
         // Prepare the options to pass when fetching the (photo, or video preview) image.
         let options = PHImageRequestOptions()
         options.deliveryMode = .highQualityFormat
@@ -78,28 +69,26 @@ final class PhotoViewerController: UIViewController {
         }
         
         progressView.isHidden = false
-        //progressView.progress = 0 ///???
+        //progressView.progress = 0 /// need?
         requestID = PHImageManager.default().requestImage(
             for: asset,
             targetSize: PHImageManagerMaximumSize,
             contentMode: .aspectFit,
             options: options,
             resultHandler: { image, info in
-                // Hide the progress view now the request has completed.
+                /// Hide the progress view now the request has completed.
                 self.progressView.isHidden = true
                 
-                // If successful, show the image view and display the image.
-                guard let image = image else { return }
-                
-                // Now that we have the image, show it.
-                
+                guard let image = image else {
+                    return
+                }
                 self.imageScrollView.image = image
                 self.imageScrollView.updateZoom()
-                
         })
         
         
         printSize()
+        //printMetadata()
     }
     
     func printSize() {
@@ -110,198 +99,162 @@ final class PhotoViewerController: UIViewController {
         print("creationDate", asset.creationDate ?? "nil")
         print("modificationDate", asset.modificationDate ?? "nil")
         print(asset.originalFilename ?? "originalFilename nil")
+        print(asset.location ?? "location nil")
         
         
         let options = PHImageRequestOptions()
         options.deliveryMode = .highQualityFormat
         options.isNetworkAccessAllowed = true
-//        options.isSynchronous = true
+        //options.isSynchronous = true
         options.resizeMode = .exact
-        ///PHImageFileURLKey
         
         PHImageManager.default().requestImageData(for: asset, options: options) { (data, uniformTypeIdentifier, orientation, info) in
             if let data = data {
                 print(data.sizeString)
                 
-                
-                if let fileName = (info?["PHImageFileURLKey"] as? URL)?.lastPathComponent {
-                    print("///////" + fileName + "////////")
-                    //do sth with file name
+                if let fileName = PHAsset.filename(from: info) {
+                    print("iOS fileName", fileName)
                 }
                 
-                if let ciImage = CIImage(data: data) {
-                    print(ciImage.properties)
-                }
-                
-                
-                let qqq = NSMutableDictionary()
-                qqq["1111111111111111111"] = "1111111111111111111"
-                let path = (info?["PHImageFileURLKey"] as? URL)!
-                
-                
-                let qdata = NSMutableData(data: data)
-                
-                let z = self.saveImage(qdata, withMetadata: qqq, atPath: path)
-                print(z)
-                print(CIImage(data: qdata as Data)?.properties ?? "nil")
-                print()
-                
-                
+                /// metadata
+//                if let ciImage = CIImage(data: data) {
+//                    print(ciImage.properties)
+//                }
+
             }
         }
-        
-        
-        
-        
-//        let options = PHContentEditingInputRequestOptions()
-//        options.networkAccessAllowed = true //download asset metadata from iCloud if needed
-//
-//        asset.requestContentEditingInputWithOptions(options) { (contentEditingInput: PHContentEditingInput?, _) -> Void in
-//            let fullImage = CIImage(contentsOfURL: contentEditingInput!.fullSizeImageURL)
-//
-//            print(fullImage.properties)
-//        }
     }
     
-    
-    @IBAction func actionClearBarButton(_ sender: UIBarButtonItem) {
-    
-        
-        
+    @IBAction func actionDeleteBarButton(_ sender: UIBarButtonItem) {
+        removeAsset()
     }
     
-    private func clearMetadata() {
+    @IBAction func actionFavoriteBarButton(_ sender: UIBarButtonItem) {
+        toggeleFavoriteAsset()
+    }
+    
+    private func printMetadata() {
         guard let asset = asset else {
             return
         }
         
         let options = PHContentEditingInputRequestOptions()
         options.isNetworkAccessAllowed = true
-        // Load metadata for asset:
+        
         asset.requestContentEditingInput(with: options) { contentEditingInput, _ in
             guard
-                let url = contentEditingInput!.fullSizeImageURL,
+                let url = contentEditingInput?.fullSizeImageURL,
                 let fullImage = CIImage(contentsOf: url)
             else {
                 return
             }
-            
-            
-            
-            let resources = PHAssetResource.assetResources(for: asset)
-            guard let avAsset = resources.first else {
-                return
+            print(fullImage.properties)
+        }
+
+    }
+    
+    func toggeleFavoriteAsset() {
+        print("self.asset 1", self.asset?.isFavorite == true ? "♥︎" : "♡")
+        
+        guard let asset = asset else {
+            return
+        }
+        
+        PHPhotoLibrary.shared().performChanges({
+            let request = PHAssetChangeRequest(for: asset)
+            request.isFavorite = !asset.isFavorite
+            request.creationDate = Date()
+//            request.isHidden = !asset.isHidden
+            request.location = nil
+        }, completionHandler: { success, error in
+            if success {
+                DispatchQueue.main.sync {
+                    print("self.asset 2", self.asset?.isFavorite == true ? "♡": "♥︎")
+                    print("asset", asset.isFavorite ? "♡": "♥︎")
+                    self.favoriteBarButton.title = asset.isFavorite ? "♡": "♥︎"
+                }
+            } else if let error = error {
+                print("can't set favorite: \(error.localizedDescription)")
+            } else {
+                print(CustomErrors.unknown())
             }
+        })
+        
+    }
+    
+    func removeAsset() {
+        /// https://developer.apple.com/documentation/photos/phassetcollection
+        guard let asset = asset else {
+            return
+        }
+        
+        let completion = { (success: Bool, error: Error?) -> Void in
+            if success {
+                print("deleted asset")
+                /// check !!!!!
+//                PHPhotoLibrary.shared().unregisterChangeObserver(self)
+                DispatchQueue.main.sync {
+                    _ = self.navigationController!.popViewController(animated: true)
+                }
+            } else if let error = error {
+                print("can't remove asset: \(error.localizedDescription)")
+            } else {
+                print(CustomErrors.unknown())
+            }
+        }
+        
+        let fetchResult = PHAssetCollection.fetchAssetCollectionsContaining(asset, with: .smartAlbum, options: nil)
+        
+        if fetchResult.count == 0 {
+            // Delete asset from library
+            PHPhotoLibrary.shared().performChanges({
+                PHAssetChangeRequest.deleteAssets([asset] as NSArray)
+            }, completionHandler: completion)
             
-//            guard let exportSession = AVAssetExportSession(asset: avAsset, presetName: AVAssetExportPresetPassthrough) else { return }
-//
-//            var mutableMetadata = exportSession.asset.metadata
-//            let metadataCopy = mutableMetadata
-
-            
-//            fullImage.properties = [:]
-            
-            
-            
-//            var date: NSDate? = nil
-//            // Parse the date from the EXIF data:
-//            if let dateTimeString = fullImage!.properties["{Exif}"]?["DateTimeOriginal"] as? String {
-//                date = xifDateFormatter.dateFromString(dateTimeString)
-//            }
-//            // Parse the 2D location from the GPS data:
-//            var location: CLLocation? = nil
-//            if let gps = fullImage?.properties["{GPS}"] {
-//                var latitude: CLLocationDegrees? = nil
-//                if let latitudeRaw = gps["Latitude"] as? CLLocationDegrees, latitudeRef = gps["LatitudeRef"] as? String {
-//                    let sign = ((latitudeRef == "N") ? 1 : -1)
-//                    latitude = CLLocationDegrees(Double(sign) * Double(latitudeRaw))
-//                }
-//                var longitude: CLLocationDegrees? = nil
-//                if let longitudeRaw = gps["Longitude"] as? CLLocationDegrees, longitudeRef = gps["LongitudeRef"] as? String {
-//                    let sign = ((longitudeRef == "E") ? 1 : -1)
-//                    longitude = CLLocationDegrees(Double(sign) * Double(longitudeRaw))
-//                }
-//                if latitude != nil && longitude != nil {
-//                    location = CLLocation(latitude: latitude!, longitude: longitude!)
-//                }
-//            }
-//            self.captionPhoto(ImageWithMeta(photo: photo, location: location, date: date))
+        } else {
+            /// add DispatchGroup handler !!!
+            fetchResult.enumerateObjects { (collection, _, _) in
+                // Remove asset from album
+                PHPhotoLibrary.shared().performChanges({
+                    let request = PHAssetCollectionChangeRequest(for: collection)
+                    request?.removeAssets([asset] as NSArray)
+                }, completionHandler: completion)
+            }
         }
 
     }
     
     
-    
-    
-    ///https://developer.apple.com/library/content/qa/qa1895/_index.html
-    ///https://gist.github.com/kwylez/a4b6ec261e52970e1fa5dd4ccfe8898f
-    
-    /// Generate Metadata Exif for GPS
-    ///https://gist.github.com/nitrag/343fe13f01bb0ef3692f2ae2dfe33e86
-    
-    /// parse location
-    /// https://gist.github.com/kkleidal/73401405f7d5fd168d061ad0c154ea18
-    
-    
-    
-    /// https://stackoverflow.com/a/42818232
-    func saveImage(_ data: NSMutableData, withMetadata metadata: NSMutableDictionary, atPath path: URL) -> Bool {
-//        guard let jpgData = UIImageJPEGRepresentation(image, 1) else {
-//            return false
-//        }
-        // make an image source
-        guard let source = CGImageSourceCreateWithData(data as CFData, nil), let uniformTypeIdentifier = CGImageSourceGetType(source) else {
-            return false
-        }
+    func applyPhotoFilter(_ filterName: String, input: PHContentEditingInput, output: PHContentEditingOutput, completion: () -> Void) {
         
+        // Load the full size image.
+        guard let inputImage = CIImage(contentsOf: input.fullSizeImageURL!)
+            else { fatalError("can't load input image to edit") }
         
+        // Apply the filter.
+        let outputImage = inputImage
+            .oriented(forExifOrientation: input.fullSizeImageOrientation)
+            .applyingFilter(filterName, parameters: [:])
         
-        // make an image destination pointing to the file we want to write
-        guard let destination = CGImageDestinationCreateWithData(data, uniformTypeIdentifier, 1, nil) else {
-            return false
-        }
+        // Write the edited image as a JPEG.
         
-        // add the source image to the destination, along with the metadata
-        CGImageDestinationAddImageFromSource(destination, source, 0, metadata)
-        
-        // and write it out
-        return CGImageDestinationFinalize(destination)
-    }
+            if #available(iOS 10.0, *) {
+                do {
+                    try CIContext().writeJPEGRepresentation(of: outputImage,
+                                                            to: output.renderedContentURL,
+                                                            colorSpace: inputImage.colorSpace!,
+                                                            options: [:])
+                } catch let error {
+                    fatalError("can't apply filter to image: \(error)")
+                }
+            } else {
+                /// TODO
+//                let context = UIGraphicsGetCurrentContext()!
+//                context.
+            }
 
-    
-    /// https://medium.com/@emiswelt/exporting-images-with-metadata-to-the-photo-gallery-in-swift-3-ios-10-66210bbad5d2
-    ///
-    // Take care when passing the paths. The directory must exist.
-    // let path = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).first! + "/"
-    // let filePath = path + name + ".jpg"
-    // try! FileManager.default.createDirectory(atPath: path, withIntermediateDirectories: true, attributes: nil)
-    // saveToPhotoAlbumWithMetadata(image, filePath: filePath)
-    static func saveToPhotoAlbumWithMetadata(_ image: CGImage, filePath: String) {
-        
-        let cfPath = CFURLCreateWithFileSystemPath(nil, filePath as CFString, CFURLPathStyle.cfurlposixPathStyle, false)
-        
-        // You can change your exif type here.
-        let destination = CGImageDestinationCreateWithURL(cfPath!, kUTTypeJPEG, 1, nil)
-        
-        // Place your metadata here.
-        // Keep in mind that metadata follows a standard. You can not use custom property names here.
-        let tiffProperties = [
-            kCGImagePropertyTIFFMake as String: "Your camera vendor",
-            kCGImagePropertyTIFFModel as String: "Your camera model"
-            ] as CFDictionary
-        
-        let properties = [
-            kCGImagePropertyExifDictionary as String: tiffProperties
-            ] as CFDictionary
-        
-        CGImageDestinationAddImage(destination!, image, properties)
-        CGImageDestinationFinalize(destination!)
-        
-        try? PHPhotoLibrary.shared().performChangesAndWait {
-            PHAssetChangeRequest.creationRequestForAssetFromImage(atFileURL: URL(fileURLWithPath: filePath))
-        }
+        completion()
     }
-
 }
 
 extension PhotoViewerController: UIScrollViewDelegate {
@@ -322,9 +275,14 @@ extension PhotoViewerController: PHPhotoLibraryChangeObserver {
             // Check if there are changes to the asset we're displaying.
             guard
                 let asset = asset,
-                let details = changeInstance.changeDetails(for: asset),
-                let assetAfterChanges = details.objectAfterChanges
+                let details = changeInstance.changeDetails(for: asset)
             else {
+                return
+            }
+            
+            guard let assetAfterChanges = details.objectAfterChanges else {
+                print("Photo was deleted")
+                _ = self.navigationController!.popViewController(animated: true)
                 return
             }
 
@@ -335,29 +293,6 @@ extension PhotoViewerController: PHPhotoLibraryChangeObserver {
             if details.assetContentChanged {
                 updateStillImage()
             }
-        }
-    }
-}
-
-extension Data {
-    static let byteFormatter = ByteCountFormatter().setup {
-        $0.allowedUnits = .useAll
-        $0.countStyle = .file
-    }
-    
-    var sizeString: String {
-        return Data.byteFormatter.string(fromByteCount: Int64(count))
-    }
-}
-
-extension PHAsset {
-    var originalFilename: String? {
-        if #available(iOS 9.0, *) {
-            let resources = PHAssetResource.assetResources(for: self)
-            return resources.first?.originalFilename
-        } else {
-            /// this is an undocumented workaround that works as of iOS 9.1
-            return value(forKey: "filename") as? String
         }
     }
 }
