@@ -8,6 +8,8 @@
 
 import UIKit
 
+// TODO: fix bottom insets
+
 final class LocalPhotosController: UIViewController {
     
     @IBOutlet weak var collectionView: UICollectionView!
@@ -19,6 +21,11 @@ final class LocalPhotosController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        if #available(iOS 11.0, *) {
+            navigationController?.navigationBar.prefersLargeTitles = true
+            navigationController?.navigationItem.largeTitleDisplayMode = .never
+        }
         
         permissionsManager.requestPhotoAccess { [weak self] status in
             guard let `self` = self else { return }

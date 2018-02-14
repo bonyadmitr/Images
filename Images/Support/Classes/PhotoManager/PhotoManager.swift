@@ -38,7 +38,8 @@ final class PhotoManager: NSObject {
     func prepereForUse() {
         photoLibrary.register(self)
         let allPhotosOptions = PHFetchOptions()
-        allPhotosOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: true)]
+        allPhotosOptions.sortDescriptors = [NSSortDescriptor(key: "isFavorite", ascending: true)]
+        //allPhotosOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: true)]
         fetchResult = PHAsset.fetchAssets(with: allPhotosOptions)
     }
     
@@ -129,7 +130,7 @@ extension PhotoManager: PHPhotoLibraryChangeObserver {
         DispatchQueue.main.sync {
             // Hang on to the new fetch result.
             self.fetchResult = changes.fetchResultAfterChanges
-            self.delegate?.photoLibraryDidChange(with: changes)
+            self.delegate?.photoLibraryDidChange(with: changes, fetchResult: self.fetchResult)
             resetCachedAssets()
         }
     }

@@ -170,9 +170,14 @@
                                         </connections>
                                     </barButtonItem>
                                     <barButtonItem style="plain" systemItem="flexibleSpace" id="bn2-RK-wic"/>
-                                    <barButtonItem title="Like" id="3Qv-CF-JNT">
+                                    <barButtonItem title="Filter" id="3Qv-CF-JNT">
                                         <connections>
-                                            <action selector="actionFavoriteBarButton:" destination="9uL-BQ-pSh" id="rD3-hR-Kac"/>
+                                            <action selector="actionFilterBarButton:" destination="9uL-BQ-pSh" id="QTx-o5-m9F"/>
+                                        </connections>
+                                    </barButtonItem>
+                                    <barButtonItem title="Like" id="5GX-UV-XRF">
+                                        <connections>
+                                            <action selector="actionFavoriteBarButton:" destination="9uL-BQ-pSh" id="qtz-JO-8hE"/>
                                         </connections>
                                     </barButtonItem>
                                 </items>
@@ -200,7 +205,7 @@
                         <viewLayoutGuide key="safeArea" id="1uH-ND-yYG"/>
                     </view>
                     <connections>
-                        <outlet property="favoriteBarButton" destination="3Qv-CF-JNT" id="Pvw-sT-9eX"/>
+                        <outlet property="favoriteBarButton" destination="5GX-UV-XRF" id="erE-Me-Eae"/>
                         <outlet property="imageScrollView" destination="Zvj-5l-nUR" id="CSr-fx-TpW"/>
                         <outlet property="progressView" destination="UKK-9r-14S" id="hcH-c5-Mms"/>
                     </connections>

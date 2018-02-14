@@ -48,6 +48,11 @@ final class LibraryController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        if #available(iOS 11.0, *) {
+            navigationController?.navigationBar.prefersLargeTitles = true
+            navigationController?.navigationItem.largeTitleDisplayMode = .always
+        }
+        
         tableView.dataSource = self
         tableView.delegate = self
         

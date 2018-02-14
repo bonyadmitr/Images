@@ -24,4 +24,9 @@ extension PHAsset {
     static func filename(from info: [AnyHashable : Any]?) -> String? {
         return (info?["PHImageFileURLKey"] as? URL)?.lastPathComponent
     }
+    
+    ///result is in iCloud, meaning a new request will need to get issued (with networkAccessAllowed set) to get the result
+    static func isInCloud(from info: [AnyHashable : Any]?) -> Bool {
+        return (info?[PHImageResultIsInCloudKey] as? NSNumber)?.boolValue == true
+    }
 }

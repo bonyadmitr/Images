@@ -12,6 +12,13 @@ import Photos
 /// need send image or imageView for long downloads
 /// PHAdjustmentData
 
+/// edit album
+/// https://stackoverflow.com/questions/31239513/how-can-i-edit-or-rename-a-phassetcollection-localizedtitle
+
+
+/// check all
+/// https://habrahabr.ru/post/318810/
+
 final class PhotoViewerController: UIViewController {
     
     @IBOutlet weak var progressView: UIProgressView!
@@ -23,6 +30,10 @@ final class PhotoViewerController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+//        if #available(iOS 11.0, *) {
+//            navigationController?.navigationBar.prefersLargeTitles = false
+//        }
         
         PHPhotoLibrary.shared().register(self)
         
@@ -98,7 +109,11 @@ final class PhotoViewerController: UIViewController {
         
         print("creationDate", asset.creationDate ?? "nil")
         print("modificationDate", asset.modificationDate ?? "nil")
-        print(asset.originalFilename ?? "originalFilename nil")
+        
+        if let originalFilename = asset.originalFilename {
+            title = originalFilename
+        }
+        
         print(asset.location ?? "location nil")
         
         
@@ -133,6 +148,10 @@ final class PhotoViewerController: UIViewController {
         toggeleFavoriteAsset()
     }
     
+    @IBAction func actionFilterBarButton(_ sender: UIBarButtonItem) {
+        applyFilter()
+    }
+    
     private func printMetadata() {
         guard let asset = asset else {
             return
@@ -153,6 +172,88 @@ final class PhotoViewerController: UIViewController {
 
     }
     
+    // TODO: TODO: clear
+    private func applyFilter() {
+        guard let asset = asset else {
+            return
+        }
+        
+        let formatIdentifier = Bundle.main.bundleIdentifier!
+        let formatVersion = "1.0"
+        let filterName = "CISepiaTone"
+        //let filterName = "CIPhotoEffectChrome"
+        
+        let options = PHContentEditingInputRequestOptions()
+        options.isNetworkAccessAllowed = true
+        options.canHandleAdjustmentData = {
+            $0.formatIdentifier == formatIdentifier && $0.formatVersion == formatVersion
+        }
+        
+        asset.requestContentEditingInput(with: options) { input, info in
+//            guard
+//                let url = contentEditingInput?.fullSizeImageURL,
+//                let fullImage = CIImage(contentsOf: url)
+//            else {
+//                return
+//            }
+            
+            guard let input = input
+                else { fatalError("can't get content editing input: \(info)") }
+            
+            // This handler gets called on the main thread; dispatch to a background queue for processing.
+            DispatchQueue.global(qos: .userInitiated).async {
+                
+                // Create adjustment data describing the edit.
+                let adjustmentData = PHAdjustmentData(formatIdentifier: formatIdentifier,
+                                                      formatVersion: formatVersion,
+                                                      data: filterName.data(using: .utf8)!)
+                
+                /* NOTE:
+                 This app's filter UI is fire-and-forget. That is, the user picks a filter,
+                 and the app applies it and outputs the saved asset immediately. There's
+                 no UI state for having chosen but not yet committed an edit. This means
+                 there's no role for reading adjustment data -- you do that to resume
+                 in-progress edits, and this sample app has no notion of "in-progress".
+                 
+                 However, it's still good to write adjustment data so that potential future
+                 versions of the app (or other apps that understand our adjustement data
+                 format) could make use of it.
+                 */
+                
+                // Create content editing output, write the adjustment data.
+                let output = PHContentEditingOutput(contentEditingInput: input)
+                output.adjustmentData = adjustmentData
+
+                self.applyPhotoFilter(filterName, input: input, output: output) {
+                    PHPhotoLibrary.shared().performChanges({
+                        let request = PHAssetChangeRequest(for: asset)
+                        request.contentEditingOutput = output
+                    }, completionHandler: { success, error in
+                        if !success { print("can't edit asset: \(String(describing: error))") }
+                    })
+                }
+            }
+        }
+        
+    }
+    
+    /// CHECK
+    func revertAsset() {
+        guard let asset = asset else {
+            return
+        }
+        
+        PHPhotoLibrary.shared().performChanges({
+            let request = PHAssetChangeRequest(for: asset)
+            request.revertAssetContentToOriginal()
+        }, completionHandler: { success, error in
+            if !success {
+                print("can't revert asset: \(String(describing: error))")
+            }
+        })
+    }
+    
+    
     func toggeleFavoriteAsset() {
         print("self.asset 1", self.asset?.isFavorite == true ? "♥︎" : "♡")
         
@@ -163,7 +264,7 @@ final class PhotoViewerController: UIViewController {
         PHPhotoLibrary.shared().performChanges({
             let request = PHAssetChangeRequest(for: asset)
             request.isFavorite = !asset.isFavorite
-            request.creationDate = Date()
+//            request.creationDate = Date()
 //            request.isHidden = !asset.isHidden
             request.location = nil
         }, completionHandler: { success, error in
@@ -191,10 +292,11 @@ final class PhotoViewerController: UIViewController {
         let completion = { (success: Bool, error: Error?) -> Void in
             if success {
                 print("deleted asset")
-                /// check !!!!!
-//                PHPhotoLibrary.shared().unregisterChangeObserver(self)
+                /// Use unregisterChangeObserver or
+                /// handle in PHPhotoLibraryChangeObserver with objectAfterChanges == nil
+                PHPhotoLibrary.shared().unregisterChangeObserver(self)
                 DispatchQueue.main.sync {
-                    _ = self.navigationController!.popViewController(animated: true)
+                    _ = self.navigationController?.popViewController(animated: true)
                 }
             } else if let error = error {
                 print("can't remove asset: \(error.localizedDescription)")
@@ -248,13 +350,40 @@ final class PhotoViewerController: UIViewController {
                     fatalError("can't apply filter to image: \(error)")
                 }
             } else {
-                /// TODO
+                // TODO: TODO: for iOS 9
 //                let context = UIGraphicsGetCurrentContext()!
 //                context.
             }
 
         completion()
     }
+    
+
+    
+    // TODO: TODO: toolbar update
+    func updateToolbars() {
+        
+        // Enable editing buttons if the asset can be edited.
+        //        editButton.isEnabled = asset.canPerform(.content) && asset.playbackStyle != .imageAnimated
+//        favoriteButton.isEnabled = asset.canPerform(.properties)
+//        favoriteButton.title = asset.isFavorite ? "♥︎" : "♡"
+//
+//        // Enable the trash button if the asset can be deleted.
+//        if assetCollection != nil {
+//            trashButton.isEnabled = assetCollection.canPerform(.removeContent)
+//        } else {
+//            trashButton.isEnabled = asset.canPerform(.delete)
+//        }
+//        toolbarItems = [favoriteButton, space, trashButton]
+//        navigationController?.isToolbarHidden = false
+    }
+    
+    /// can be used
+//    var targetSize: CGSize {
+//        let scale = UIScreen.main.scale
+//        return CGSize(width: imageView.bounds.width * scale,
+//                      height: imageView.bounds.height * scale)
+//    }
 }
 
 extension PhotoViewerController: UIScrollViewDelegate {
@@ -282,7 +411,8 @@ extension PhotoViewerController: PHPhotoLibraryChangeObserver {
             
             guard let assetAfterChanges = details.objectAfterChanges else {
                 print("Photo was deleted")
-                _ = self.navigationController!.popViewController(animated: true)
+                /// will be called when photo was delete from another place
+                _ = self.navigationController?.popViewController(animated: true)
                 return
             }
 
