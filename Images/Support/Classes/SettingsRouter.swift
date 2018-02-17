@@ -50,4 +50,10 @@ extension SettingsRouter {
                              title: "Camera access disabled",
                              message: "You can enable access to camera in Settings")
     }
+    
+    func presentSettingsAlertForLocationAccess(in controller: UIViewController) {
+        presentSettingsAlert(in: controller,
+                             title: "Location access disabled",
+                             message: "You can enable access to location in Settings")
+    }
 }

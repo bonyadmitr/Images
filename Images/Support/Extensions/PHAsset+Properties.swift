@@ -9,24 +9,25 @@
 import Photos
 
 extension PHAsset {
+    
+    var resource: PHAssetResource? {
+        return PHAssetResource.assetResources(for: self).first
+    }
+    
     var originalFilename: String? {
         if #available(iOS 9.0, *) {
-            let resources = PHAssetResource.assetResources(for: self)
-            return resources.first?.originalFilename
+            return resource?.originalFilename
         } else {
-            /// this is an undocumented workaround that works as of iOS 9.1
             return value(forKey: "filename") as? String
+        }
+    }
+    
+    var uniformTypeIdentifier: String? {
+        if #available(iOS 9.0, *) {
+            return resource?.uniformTypeIdentifier
+        } else {
+            return value(forKey: "uniformTypeIdentifier") as? String
         }
     }
 }
 
-extension PHAsset {
-    static func filename(from info: [AnyHashable : Any]?) -> String? {
-        return (info?["PHImageFileURLKey"] as? URL)?.lastPathComponent
-    }
-    
-    ///result is in iCloud, meaning a new request will need to get issued (with networkAccessAllowed set) to get the result
-    static func isInCloud(from info: [AnyHashable : Any]?) -> Bool {
-        return (info?[PHImageResultIsInCloudKey] as? NSNumber)?.boolValue == true
-    }
-}

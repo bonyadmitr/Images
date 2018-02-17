@@ -124,8 +124,13 @@ final class PhotoViewerController: UIViewController {
         options.resizeMode = .exact
         
         PHImageManager.default().requestImageData(for: asset, options: options) { (data, uniformTypeIdentifier, orientation, info) in
+            
+            if let type = uniformTypeIdentifier {
+                print("uniformTypeIdentifier:", type)
+            }
+            
             if let data = data {
-                print(data.sizeString)
+                print(data.formattedSize)
                 
                 if let fileName = PHAsset.filename(from: info) {
                     print("iOS fileName", fileName)

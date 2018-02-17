@@ -9,10 +9,14 @@
 import Foundation
 
 extension Data {
-    var sizeString: String {
+    var size: Int64 {
+        return Int64(count)
+    }
+    
+    var formattedSize: String {
         return ByteCountFormatter().setup {
             $0.allowedUnits = .useAll
             $0.countStyle = .file
-        }.string(fromByteCount: Int64(count))
+        }.string(fromByteCount: size)
     }
 }
