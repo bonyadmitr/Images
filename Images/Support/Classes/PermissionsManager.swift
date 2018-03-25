@@ -9,6 +9,7 @@
 import AVFoundation
 import Photos
 import CoreLocation
+import Contacts
 
 typealias AccessStatusHandler = (_ status: AccessStatus) -> Void
 
@@ -156,6 +157,26 @@ final class PermissionsManager {
                 locationManager?.requestWhenInUseAuthorization()
             case .location:
                 locationManager?.requestLocation()
+            }
+        }
+    }
+    
+    
+    //----------
+    
+    func requestContactsAccess(handler: @escaping AccessStatusHandler) {
+        switch CNContactStore.authorizationStatus(for: .contacts) {
+        case .authorized:
+            handler(.success)
+        case .denied, .restricted:
+            handler(.denied)
+        case .notDetermined:
+            CNContactStore().requestAccess(for: .contacts) { granted, _ in
+                if granted {
+                    handler(.success)
+                } else {
+                    handler(.denied)
+                }
             }
         }
     }
