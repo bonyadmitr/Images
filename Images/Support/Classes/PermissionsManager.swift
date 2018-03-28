@@ -65,12 +65,8 @@ final class PermissionsManager {
     }
      */
     func requestPhotoAccess(handler: @escaping AccessStatusHandler) {
-        switch PHPhotoLibrary.authorizationStatus() {
-        case .authorized:
-            handler(.success)
-        case .denied, .restricted:
-            handler(.denied)
-        case .notDetermined:
+        
+        func requestPhotoAuthorization() {
             PHPhotoLibrary.requestAuthorization() { status in
                 switch status {
                 case .authorized:
@@ -83,7 +79,29 @@ final class PermissionsManager {
                 }
             }
         }
+        
+        func operationSystemVersionLessThen(_ version: Int) -> Bool {
+            return ProcessInfo().operatingSystemVersion.majorVersion < version
+        }
+        
+        /// bug “PHPhotoLibrary.authorizationStatus” is authorized in iOS 9 by default (checked on iPad)
+        /// and "PHAssetResource.assetResources(for: ASSET).first" freezing the app
+        if operationSystemVersionLessThen(10) {
+            requestPhotoAuthorization()
+            return
+        }
+        
+        switch PHPhotoLibrary.authorizationStatus() {
+        case .authorized:
+            handler(.success)
+        case .denied, .restricted:
+            handler(.denied)
+        case .notDetermined:
+            requestPhotoAuthorization()
+        }
     }
+    
+    
     
     /// KEYS
     /** Example
