@@ -9,6 +9,7 @@
 import UIKit
 
 final class SettingsRouter {
+    
     func openSettings() {
         guard
             let settingsUrl = URL(string: UIApplicationOpenSettingsURLString),
@@ -48,5 +49,11 @@ extension SettingsRouter {
         presentSettingsAlert(in: controller,
                              title: "Camera access disabled",
                              message: "You can enable access to camera in Settings")
+    }
+    
+    func presentSettingsAlertForLocationAccess(in controller: UIViewController) {
+        presentSettingsAlert(in: controller,
+                             title: "Location access disabled",
+                             message: "You can enable access to location in Settings")
     }
 }

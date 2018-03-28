@@ -13,8 +13,8 @@ protocol Сustomizable: class {}
 extension NSObject: Сustomizable {}
 
 extension Сustomizable {
-    func setup(closure: @escaping (Self) -> Void) -> Self {
-        closure(self)        
+    func setup(_ closure: @escaping (Self) -> Void) -> Self {
+        closure(self)
         return self
     }
 }

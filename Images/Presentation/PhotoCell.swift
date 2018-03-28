@@ -22,10 +22,12 @@ final class PhotoCell: UICollectionViewCell {
 
 extension PhotoManager {
     func fill(cell: PhotoCell, for indexPath: IndexPath) {
-        let asset = fetchResult.object(at: indexPath.item)
+        guard let asset = fetchResult?.object(at: indexPath.item) else {
+            return
+        }
         cell.representedAssetIdentifier = asset.localIdentifier
         
-        cachingManager.requestImage(for: asset, targetSize: photoSize, contentMode: .default, options: nil, resultHandler: { image, _ in
+        cachingManager.requestImage(for: asset, targetSize: photoSize, contentMode: .default, options: requestOptions, resultHandler: { image, _ in
             /// The cell may have been recycled by the time this handler gets called;
             /// set the cell's thumbnail image only if it's still showing the same asset.
             if cell.representedAssetIdentifier == asset.localIdentifier, image != nil {
@@ -55,3 +57,32 @@ func saveAndGetItemSize(for collectionView: UICollectionView) -> CGSize {
     return itemSize
 }
 
+extension UICollectionView {
+    func setLayout(itemSize: CGSize? = nil, verticalSpace: CGFloat? = nil, horisontalSpace: CGFloat? = nil) {
+        if let layout = collectionViewLayout as? UICollectionViewFlowLayout {
+            if let itemSize = itemSize {
+                layout.itemSize = itemSize
+            }
+            if let verticalSpace = verticalSpace {
+                layout.minimumLineSpacing = verticalSpace
+            }
+            if let horisontalSpace = horisontalSpace {
+                layout.minimumInteritemSpacing = horisontalSpace
+            }
+        }
+    }
+    
+    @discardableResult
+    func setCellWidthFor(columnsNumber: CGFloat, padding: CGFloat) -> CGSize {
+        let viewWidth = bounds.width
+        let itemWidth = floor((viewWidth - (columnsNumber - 1) * padding) / columnsNumber)
+        let itemSize = CGSize(width: itemWidth, height: itemWidth)
+        
+        if let layout = collectionViewLayout as? UICollectionViewFlowLayout {
+            layout.itemSize = itemSize
+            layout.minimumInteritemSpacing = padding
+            layout.minimumLineSpacing = padding
+        }
+        return itemSize
+    }
+}

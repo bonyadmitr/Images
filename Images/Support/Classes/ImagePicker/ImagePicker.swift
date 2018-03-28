@@ -6,50 +6,28 @@
 //  Copyright © 2018 Bondar Yaroslav. All rights reserved.
 //
 
-import AVFoundation
 import Photos
+
+typealias ResponseImage = (_ image: UIImage) -> Void
 
 /**
 add to Info.plist
-1) Camera
+
+ 1) Camera:
 NSCameraUsageDescription
-2) Photo Library
+
+ 2) Photo Library:
 NSPhotoLibraryUsageDescription
-Example text:
-Please allow access to save photo in your photo library
  */
-
-//typealias ResponseImage = (ResponseResult<UIImage>) -> Void
-typealias ResponseImage = (_ image: UIImage) -> Void
-
-enum ImagePickerType {
-    case photoLibrary
-    case camera
-}
-extension ImagePickerType {
-    var imagePickerType: UIImagePickerControllerSourceType? {
-        switch self {
-        case .photoLibrary:
-            return .photoLibrary
-        case .camera:
-            return .camera
-        }
-    }
-}
-
-struct ImagePickerSettings {
-    let barTintColor: UIColor?
-    let tintColor: UIColor?
-    let barStyle: UIBarStyle?
-}
 
 final class ImagePicker: NSObject {
     
     /// better to use UINavigationBar.appearance() for gloabl customization
-    /// use "settings" if need colors besides UINavigationBar.appearance()
+    /// use "settings" if need set colors over UINavigationBar.appearance()
     var settings: ImagePickerSettings?
     
     private lazy var settingsRouter = SettingsRouter()
+    private lazy var permissionsManager = PermissionsManager()
     
     private var handler: ResponseImage?
     
@@ -61,24 +39,30 @@ final class ImagePicker: NSObject {
             return
         }
         
+        /// only .camera is not available in simulator
         guard UIImagePickerController.isSourceTypeAvailable(imagePickerType) else {
             return print("- not Available \(imagePickerType)")
         }
         
         let picker = imagePicker(for: imagePickerType)
-        vc.present(picker, animated: true, completion: nil)
+        
+        DispatchQueue.main.async {
+            vc.present(picker, animated: true, completion: nil)
+        }
     }
     
     private func imagePicker(for type: UIImagePickerControllerSourceType) -> UIImagePickerController {
         let picker = UIImagePickerController()
         picker.delegate = self
         picker.sourceType = type
-        //picker.modalPresentationStyle = .OverFullScreen ///???
-        setup(picker: picker)
+        picker.modalPresentationStyle = .overCurrentContext /// to turn on landscape mode
+        picker.modalPresentationCapturesStatusBarAppearance = true
+//        picker.allowsEditing = true
+        setupPickerBySettings(picker)
         return picker
     }
     
-    private func setup(picker: UIImagePickerController) {
+    private func setupPickerBySettings(_ picker: UIImagePickerController) {
         if let settings = settings {
             let navBar = picker.navigationBar
             
@@ -96,58 +80,15 @@ final class ImagePicker: NSObject {
     }
 }
 
-extension ImagePicker {
-    
-    func requestCameraAccess(handler: @escaping (_ status: PhotoManagerAuthorizationStatus) -> Void) {
-        switch AVCaptureDevice.authorizationStatus(for: .video) {
-        case .authorized:
-            handler(.authorized)
-        case .denied, .restricted:
-            handler(.denied)
-        case .notDetermined:
-            AVCaptureDevice.requestAccess(for: .video) { granted in
-                if granted {
-                    handler(.authorized)
-                } else {
-                    handler(.denied)
-                }
-            }
-        }
-    }
-    
-    func requestPhotoAccess(handler: @escaping (_ status: PhotoManagerAuthorizationStatus) -> Void) {
-        switch PHPhotoLibrary.authorizationStatus() {
-        case .authorized:
-            handler(.authorized)
-        case .denied, .restricted:
-            handler(.denied)
-        case .notDetermined:
-            PHPhotoLibrary.requestAuthorization() { status in
-                switch status {
-                case .authorized:
-                    handler(.authorized)
-                case .denied, .restricted:
-                    handler(.denied)
-                case .notDetermined:
-                    /// won't happen but still
-                    handler(.denied)
-                }
-            }
-        }
-    }
-    
-}
-
 extension ImagePicker: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     
     internal func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
         if let image = info[UIImagePickerControllerEditedImage] as? UIImage {
             handler?(image)
-            //self.handler?(ResponseResult.success(image))
         } else if let image = info[UIImagePickerControllerOriginalImage] as? UIImage {
             handler?(image)
         } else {
-            print("- ImagePicker ERROR: Something went wrong")
+            print("- ImagePicker ERROR: Something went wrong with UIImagePickerController")
         }
         picker.dismiss(animated: true, completion: nil)
     }
@@ -163,11 +104,11 @@ extension ImagePicker {
         let alertVC = UIAlertController(title: "Choose source", message: nil, preferredStyle: .actionSheet)
         
         let cameraAction = UIAlertAction(title: "Camera", style: .default) { _ in
-            self.requestCameraAccess { [weak self] result in
+            self.permissionsManager.requestCameraAccess { [weak self] result in
                 guard let `self` = self else { return }
                 
                 switch result {
-                case .authorized:
+                case .success:
                     self.openPicker(in: vc, for: .camera) { image in
                         handler(image)
                     }
@@ -178,11 +119,11 @@ extension ImagePicker {
         }
         
         let libraryAction = UIAlertAction(title: "Photo library", style: .default) { _ in
-            self.requestPhotoAccess { [weak self] result in
+            self.permissionsManager.requestPhotoAccess { [weak self] result in
                 guard let `self` = self else { return}
                 
                 switch result {
-                case .authorized:
+                case .success:
                     self.openPicker(in: vc, for: .photoLibrary) { image in
                         handler(image)
                     }
@@ -198,6 +139,8 @@ extension ImagePicker {
         alertVC.addAction(libraryAction)
         alertVC.addAction(cancelAction)
         
-        vc.present(alertVC, animated: true, completion: nil)
+        DispatchQueue.main.async {
+            vc.present(alertVC, animated: true, completion: nil)
+        }
     }
 }

@@ -8,24 +8,36 @@
 
 import UIKit
 
+// TODO: fix bottom insets
+
 final class LocalPhotosController: UIViewController {
     
     @IBOutlet weak var collectionView: UICollectionView!
     private lazy var photoManager = PhotoManager()
+    private lazy var permissionsManager = PermissionsManager()
     private lazy var settingsRouter = SettingsRouter()
+    
+    private let photoViewerSegue = "PhotoViewer"
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        photoManager.requestPhotoAccess { [weak self] status in
+        if #available(iOS 11.0, *) {
+            navigationController?.navigationBar.prefersLargeTitles = true
+            navigationController?.navigationItem.largeTitleDisplayMode = .never
+        }
+        
+        permissionsManager.requestPhotoAccess { [weak self] status in
             guard let `self` = self else { return }
             
             switch status {
-            case .authorized:
+            case .success:
                 self.photoManager.resetCachedAssets()
                 self.photoManager.delegate = self
                 self.photoManager.prepereForUse()
-                self.collectionView.reloadData()
+                DispatchQueue.main.async {
+                    self.collectionView.reloadData()
+                }
             case .denied:
                 self.settingsRouter.presentSettingsAlertForPhotoAccess(in: self)
             }
@@ -44,12 +56,7 @@ final class LocalPhotosController: UIViewController {
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        photoManager.updateCachedAssetsFor(view: view, collectionView: collectionView)
-    }
-    
-    /// View controller-based status bar appearance
-    override var prefersStatusBarHidden: Bool {
-        return true
+        photoManager.updateCachedAssetsFor(collectionView: collectionView)
     }
     
     /// Determine the size of the thumbnails to request from the PHCachingImageManager
@@ -57,6 +64,20 @@ final class LocalPhotosController: UIViewController {
         let size = saveAndGetItemSize(for: collectionView)
         let scale = UIScreen.main.scale
         photoManager.photoSize = CGSize(width: size.width * scale, height: size.height * scale)
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        super.prepare(for: segue, sender: sender)
+        
+        guard segue.identifier == photoViewerSegue,
+            let vc = segue.destination as? PhotoViewerController,
+            let indexPath = sender as? IndexPath,
+            let asset = photoManager.fetchResult?[indexPath.item]
+        else {
+            return
+        }
+        
+        vc.asset = asset
     }
 }
 
@@ -75,12 +96,12 @@ extension LocalPhotosController: UICollectionViewDataSource {
 }
 extension LocalPhotosController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        print(indexPath.row)
+        performSegue(withIdentifier: photoViewerSegue, sender: indexPath)
     }
 }
 extension LocalPhotosController: UIScrollViewDelegate {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        photoManager.updateCachedAssetsFor(view: view, collectionView: collectionView)
+        photoManager.updateCachedAssetsFor(collectionView: collectionView)
     }
 }
 
